@@ -28,11 +28,31 @@ td select{width:100%;min-width:170px}.act{display:flex;gap:6px}.act button{paddi
 .msg{color:var(--mu);font-size:13px;min-height:18px;margin-top:8px}.err{color:var(--rd)}a{color:var(--pr)}
 .tabs{display:flex;gap:8px;margin-bottom:14px}.tabs button{background:var(--card);color:var(--tx);border-color:var(--bd)}.tabs button.on{background:var(--pr);color:#fff;border-color:var(--pr)}
 </style><link rel="stylesheet" href="/mobile.css"></head><body><div class="w">
-<header><img id="lg" alt="Logo"><h1>Ministério de Intercessão – Escala</h1></header>
+<header><img id="lg" alt="Logo"><h1>Ministério de Intercessão</h1></header>
+<div class="tabs"><button id="t1" class="on">Escala</button><button id="t2">Bíblia de Estudo</button></div>
+
+<div id="p1">
 <div class="card"><div class="row"><label>Mês<select id="mes"></select></label><label>Ano<input id="ano" type="number" min="2020" max="2100"></label>
 <button id="pdf" hidden>Baixar PDF</button></div></div>
 <div class="card"><div class="tw"><table><thead><tr><th>Dia</th><th>Data</th><th>Início</th><th>Término</th><th>Servos</th></tr></thead><tbody id="tb"></tbody></table></div>
 <div class="msg" id="msg"></div></div>
+</div>
+
+<div id="p2" hidden>
+<div class="card">
+  <div class="row">
+    <label>Livro, Cap ou Verso<input id="bq" placeholder="Ex: Joao 3:16 ou Salmos 23"></label>
+    <button id="bbuscar">Buscar</button>
+    <button class="s" id="brandom">Aleatório</button>
+  </div>
+</div>
+<div class="card">
+  <div id="bresultado" style="line-height:1.6; font-size:16px;">
+    <p class="msg">Pesquise um livro ou versículo para começar.</p>
+  </div>
+</div>
+<p class="msg" style="text-align:center;">Tradução: Almeida Revista e Corrigida (ARC)</p>
+</div>
 <p class="msg"><a href="/admin.html">Administração</a></p>
 </div>
 <script src="shared.js"></script>
@@ -49,4 +69,31 @@ if(y===n.getFullYear()&&m===n.getMonth()&&s.d===n.getDate())tr.classList.add("ho
 const lbs=["Dia","Data","Início","Término","Servos"];[DIAS[s.w],`${pad(s.d)}/${pad(m+1)}/${y}`,s.i,s.f,s.nome||"-"].forEach((t,i)=>{const td=document.createElement("td");td.textContent=t;td.dataset.l=lbs[i];tr.append(td)});$("tb").append(tr)})}
 catch(e){$("msg").textContent="Não foi possível carregar a escala."}}
 $("mes").onchange=carregar;$("ano").onchange=carregar;$("pdf").onclick=()=>gerarPdf(+$("ano").value,+$("mes").value,rows);carregar();
+
+// ---- Lógica da Bíblia
+$("t1").onclick=()=>aba(1);$("t2").onclick=()=>aba(2);
+function aba(n){$("p1").hidden=n!==1;$("p2").hidden=n!==2;$("t1").className=n===1?"on":"";$("t2").className=n===2?"on":""}
+
+async function buscarBiblia(ref){
+  const q=ref || $("bq").value.trim(); if(!q) return;
+  $("bresultado").innerHTML='<p class="msg">Buscando na Bíblia...</p>';
+  try {
+    const r=await fetch(`https://bible-api.com/${encodeURIComponent(q)}?translation=almeida`);
+    const j=await r.json();
+    if(j.error) throw new Error(j.error);
+    let h=`<h2 style="color:var(--pr);margin-bottom:5px;">${j.reference}</h2>`;
+    h+=j.verses.map(v=>`<p style="margin:8px 0;"><small style="color:var(--mu);margin-right:8px;">${v.verse}</small>${v.text}</p>`).join("");
+    $("bresultado").innerHTML=h;
+    if(!ref) $("bq").value=j.reference;
+    $("bresultado").parentElement.scrollTop=0;
+  } catch(e) {
+    $("bresultado").innerHTML=`<p class="msg err">Não encontramos esse trecho. Tente ex: "Joao 3:16" ou "Salmos 23".</p>`;
+  }
+}
+$("bbuscar").onclick=()=>buscarBiblia();
+$("brandom").onclick=()=>{
+  const refs=["Joao 3:16","Salmos 23","Genesis 1:1","Mateus 5:1-12","1 Corintios 13","Filipenses 4:13","Josue 1:9","Isaias 41:10","Jeremias 29:11","Salmos 91"];
+  buscarBiblia(refs[Math.floor(Math.random()*refs.length)]);
+};
+$("bq").onkeydown=e=>{if(e.key==="Enter")$("bbuscar").click()};
 </script><script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js");</script></body></html>
