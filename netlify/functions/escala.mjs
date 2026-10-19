@@ -6,7 +6,7 @@ const json = (data, status = 200) =>
   new Response(JSON.stringify(data), { status, headers: { "Content-Type": "application/json" } });
 
 export default async (req) => {
-  const store = getStore("escalas");
+  const store = getStore({ name: "escalas", consistency: "strong" });
   const ym = new URL(req.url).pathname.split("/").filter(Boolean)[2]; // /api/escala/AAAA-MM
 
   // PÚBLICO: qualquer pessoa pode consultar (só nomes e horários, sem telefones)

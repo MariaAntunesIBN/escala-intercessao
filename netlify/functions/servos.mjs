@@ -11,7 +11,7 @@ export default async (req) => {
   if (!senha) return json({ erro: "SENHA_ADMIN não configurada no Netlify." }, 500);
   if (req.headers.get("x-senha") !== senha) return json({ erro: "Senha inválida." }, 401);
 
-  const store = getStore("servos");
+  const store = getStore({ name: "servos", consistency: "strong" });
   const lista = (await store.get("lista", { type: "json" })) || [];
   const salvar = (l) => store.setJSON("lista", l);
   const id = new URL(req.url).pathname.split("/").filter(Boolean)[2]; // /api/servos/:id
