@@ -1,0 +1,28 @@
+@media (max-width:640px){
+  .w{padding:10px}
+  header{flex-direction:column;align-items:flex-start;gap:8px}
+  header img{height:44px}
+  h1{font-size:18px}
+  label{min-width:100%;flex:1 1 100%}
+  .row{gap:8px}
+  button,input,select{padding:10px 12px;font-size:16px}
+  .act{flex-wrap:wrap}
+  .act button{padding:8px 10px;font-size:14px}
+  .tabs button{flex:1}
+  .msg{font-size:14px}
+  #login{margin-top:6vh}
+
+  /* Tabelas viram cartões empilhados */
+  .tw{overflow-x:visible}
+  .tw table,.tw thead,.tw tbody,.tw tr,.tw td{display:block;width:100%}
+  .tw thead{display:none}
+  .tw tr{border:1px solid var(--bd);border-radius:10px;margin-bottom:10px;padding:6px 10px;background:var(--card)}
+  .tw td{border:0;padding:5px 0;white-space:normal;display:flex;justify-content:space-between;align-items:center;gap:12px;text-align:right}
+  .tw td::before{content:attr(data-l);color:var(--mu);font-size:12px;font-weight:600;text-align:left}
+  .tw td:empty{display:none}
+  td select{min-width:0;width:auto;flex:1}
+  tr.dom td,tr.hoje td{background:transparent;outline:none}
+  tr.dom{border-color:var(--pr)}
+  tr.hoje{outline:2px solid var(--pr);outline-offset:-2px}
+  th{white-space:normal}
+}

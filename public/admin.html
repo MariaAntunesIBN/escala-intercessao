@@ -1,5 +1,12 @@
 <!DOCTYPE html>
 <html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#31859c">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="icon" href="/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Escala">
 <meta name="robots" content="noindex"><title>Administração – Escala</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
@@ -20,7 +27,7 @@ tr.dom td{background:var(--sun)}tr.hoje td{font-weight:700;outline:2px solid var
 td select{width:100%;min-width:170px}.act{display:flex;gap:6px}.act button{padding:5px 9px;font-size:13px}
 .msg{color:var(--mu);font-size:13px;min-height:18px;margin-top:8px}.err{color:var(--rd)}a{color:var(--pr)}
 .tabs{display:flex;gap:8px;margin-bottom:14px}.tabs button{background:var(--card);color:var(--tx);border-color:var(--bd)}.tabs button.on{background:var(--pr);color:#fff;border-color:var(--pr)}
-</style><style>#login{max-width:340px;margin:12vh auto}</style></head><body><div class="w">
+</style><style>#login{max-width:340px;margin:12vh auto}</style><link rel="stylesheet" href="/mobile.css"></head><body><div class="w">
 <div id="login" class="card" hidden><h1>Administração</h1><label style="margin-top:10px">Senha de acesso<input id="pw" type="password" autocomplete="current-password"></label>
 <div class="row" style="margin-top:10px"><button id="entrar">Entrar</button><a href="/">Ver escala</a></div><div class="msg err" id="lmsg"></div></div>
 
@@ -62,8 +69,8 @@ const saved=(await (await fetch("/api/escala/"+ym())).json())||[],mp={};saved.fo
 sel=slots.map(s=>mp[s.d+"|"+s.i]||"");renderEscala();$("emsg").textContent=saved.length?"Escala já publicada para este mês.":"Escala ainda não publicada."}
 function renderEscala(){const m=+$("mes").value,y=+$("ano").value,tb=$("tb");tb.innerHTML="";const ativos=servos.filter(s=>s.ativo).map(s=>s.nome).sort((a,b)=>a.localeCompare(b,"pt"));
 slots.forEach((s,i)=>{const tr=document.createElement("tr");if(s.w===0)tr.className="dom";
-[DIAS[s.w],`${pad(s.d)}/${pad(m+1)}/${y}`,s.i,s.f].forEach(t=>{const td=document.createElement("td");td.textContent=t;tr.append(td)});
-const td=document.createElement("td"),se=document.createElement("select");
+const lbs=["Dia","Data","Início","Término"];[DIAS[s.w],`${pad(s.d)}/${pad(m+1)}/${y}`,s.i,s.f].forEach((t,j)=>{const td=document.createElement("td");td.textContent=t;td.dataset.l=lbs[j];tr.append(td)});
+const td=document.createElement("td"),se=document.createElement("select");td.dataset.l="Servo";
 const op=t=>{const o=document.createElement("option");o.value=t;o.textContent=t||"—";se.append(o)};op("");ativos.forEach(op);
 if(sel[i]&&!ativos.includes(sel[i]))op(sel[i]);se.value=sel[i];se.onchange=()=>sel[i]=se.value;td.append(se);tr.append(td);tb.append(tr)})}
 $("mes").onchange=carregarEscala;$("ano").onchange=carregarEscala;
@@ -79,10 +86,10 @@ function renderServos(){const q=$("q").value.toLowerCase(),f=$("f").value;
 const v=servos.filter(s=>(f==="todos"||(f==="ativos")===s.ativo)&&(s.nome.toLowerCase().includes(q)||s.celular.includes(q.replace(/\D/g,"")||"\u0000"))).sort((a,b)=>a.nome.localeCompare(b.nome,"pt"));
 const tb=$("sb");tb.innerHTML="";
 v.forEach(s=>{const tr=document.createElement("tr");if(!s.ativo)tr.className="off";
-const c=(t,n)=>{const td=document.createElement("td");if(n)td.append(n);else td.textContent=t;tr.append(td)};
-c(s.nome);const w=document.createElement("span");
-if(s.celular){const a=document.createElement("a");a.href="https://wa.me/"+(s.celular.length<=11?"55":"")+s.celular;a.target="_blank";a.rel="noopener";a.textContent=fmt(s.celular);w.append(a)}else w.textContent="—";c("",w);
-c(s.ativo?"Ativo":"Inativo");
+const c=(t,n,l)=>{const td=document.createElement("td");if(l)td.dataset.l=l;if(n)td.append(n);else td.textContent=t;tr.append(td)};
+c(s.nome,"","Nome");const w=document.createElement("span");
+if(s.celular){const a=document.createElement("a");a.href="https://wa.me/"+(s.celular.length<=11?"55":"")+s.celular;a.target="_blank";a.rel="noopener";a.textContent=fmt(s.celular);w.append(a)}else w.textContent="—";c("",w,"Celular");
+c(s.ativo?"Ativo":"Inativo","","Status");
 const act=document.createElement("div");act.className="act";
 const b=(t,cls,fn)=>{const x=document.createElement("button");x.textContent=t;x.className=cls;x.onclick=fn;act.append(x)};
 b("Editar","s",()=>{edit=s.id;$("nome").value=s.nome;$("cel").value=fmt(s.celular);$("salvar").textContent="Salvar";$("cancel").hidden=false;$("nome").focus()});
@@ -95,4 +102,4 @@ $("cancel").onclick=limpar;
 $("salvar").onclick=()=>run(async()=>{const b={nome:$("nome").value,celular:$("cel").value};if(edit)await api("/api/servos/"+edit,"PUT",b);else await api("/api/servos","POST",b);limpar()});
 $("cel").oninput=e=>e.target.value=fmt(e.target.value);$("q").oninput=renderServos;$("f").onchange=renderServos;
 if(senha)entrar().catch(()=>sair());else $("login").hidden=false;
-</script></body></html>
+</script><script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js");</script></body></html>

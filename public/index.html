@@ -1,5 +1,12 @@
 <!DOCTYPE html>
 <html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#31859c">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="icon" href="/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Escala">
 <title>Escala – Ministério de Intercessão</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
@@ -20,7 +27,7 @@ tr.dom td{background:var(--sun)}tr.hoje td{font-weight:700;outline:2px solid var
 td select{width:100%;min-width:170px}.act{display:flex;gap:6px}.act button{padding:5px 9px;font-size:13px}
 .msg{color:var(--mu);font-size:13px;min-height:18px;margin-top:8px}.err{color:var(--rd)}a{color:var(--pr)}
 .tabs{display:flex;gap:8px;margin-bottom:14px}.tabs button{background:var(--card);color:var(--tx);border-color:var(--bd)}.tabs button.on{background:var(--pr);color:#fff;border-color:var(--pr)}
-</style></head><body><div class="w">
+</style><link rel="stylesheet" href="/mobile.css"></head><body><div class="w">
 <header><img id="lg" alt="Logo"><h1>Ministério de Intercessão – Escala</h1></header>
 <div class="card"><div class="row"><label>Mês<select id="mes"></select></label><label>Ano<input id="ano" type="number" min="2020" max="2100"></label>
 <button id="pdf" hidden>Baixar PDF</button></div></div>
@@ -39,7 +46,7 @@ if(!rows.length){$("msg").textContent="A escala deste mês ainda não foi public
 $("msg").textContent="";$("pdf").hidden=false;
 rows.forEach(s=>{const tr=document.createElement("tr");if(s.w===0)tr.className="dom";
 if(y===n.getFullYear()&&m===n.getMonth()&&s.d===n.getDate())tr.classList.add("hoje");
-[DIAS[s.w],`${pad(s.d)}/${pad(m+1)}/${y}`,s.i,s.f,s.nome||"-"].forEach(t=>{const td=document.createElement("td");td.textContent=t;tr.append(td)});$("tb").append(tr)})}
+const lbs=["Dia","Data","Início","Término","Servos"];[DIAS[s.w],`${pad(s.d)}/${pad(m+1)}/${y}`,s.i,s.f,s.nome||"-"].forEach((t,i)=>{const td=document.createElement("td");td.textContent=t;td.dataset.l=lbs[i];tr.append(td)});$("tb").append(tr)})}
 catch(e){$("msg").textContent="Não foi possível carregar a escala."}}
 $("mes").onchange=carregar;$("ano").onchange=carregar;$("pdf").onclick=()=>gerarPdf(+$("ano").value,+$("mes").value,rows);carregar();
-</script></body></html>
+</script><script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js");</script></body></html>
