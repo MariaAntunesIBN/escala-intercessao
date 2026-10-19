@@ -25,7 +25,8 @@ header { grid-column: 1 / -1; }
   button,input,select{padding:10px 12px;font-size:16px}
   .act{flex-wrap:wrap}
   .act button{padding:8px 10px;font-size:14px}
-  .tabs button{flex:1}
+  .tabs { flex-wrap: wrap; }
+  .tabs button { flex: 1; min-width: 140px; }
   .msg{font-size:14px}
   #login{margin-top:6vh}
 
@@ -35,11 +36,17 @@ header { grid-column: 1 / -1; }
   .tw thead{display:none}
   .tw tr{border:1px solid var(--bd);border-radius:10px;margin-bottom:10px;padding:6px 10px;background:var(--card)}
   .tw td{border:0;padding:5px 0;white-space:normal;display:flex;justify-content:space-between;align-items:center;gap:12px;text-align:right}
-  .tw td::before{content:attr(data-l);color:var(--mu);font-size:12px;font-weight:600;text-align:left}
+  .tw td::before { content: attr(data-l); font-weight: 700; color: var(--pr); font-size: 11px; margin-bottom: 2px; }
   .tw td:empty{display:none}
   td select{min-width:0;width:auto;flex:1}
   tr.dom td,tr.hoje td{background:transparent;outline:none}
   tr.dom{border-color:var(--pr)}
   tr.hoje{outline:2px solid var(--pr);outline-offset:-2px}
   th{white-space:normal}
+
+  /* Bíblia Holyrics Mobile */
+  .bgrid { grid-template-columns: repeat(4, 1fr); }
+  .cgrid { grid-template-columns: repeat(5, 1fr); }
+  .vlist p { font-size: 16px; padding-left: 30px; }
+  .vlist p b { width: 25px; font-size: 13px; }
 }

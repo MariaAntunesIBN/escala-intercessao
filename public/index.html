@@ -33,6 +33,22 @@ tr.dom td{background:var(--sun)}tr.hoje td{font-weight:700;outline:2px solid var
 td select{width:100%;min-width:170px}.act{display:flex;gap:6px}.act button{padding:5px 9px;font-size:13px}
 .msg{color:var(--mu);font-size:13px;min-height:18px;margin-top:8px}.err{color:var(--rd)}a{color:var(--pr)}
 .tabs{display:flex;gap:8px;margin-bottom:14px}.tabs button{background:var(--card);color:var(--tx);border-color:var(--bd)}.tabs button.on{background:var(--pr);color:#fff;border-color:var(--pr)}
+/* Estilos Bíblia Holyrics */
+.bgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(50px,1fr));gap:4px;margin-bottom:14px}
+.bgrid button{padding:8px 2px;font-size:12px;font-weight:700;border:none;color:#fff;display:flex;flex-direction:column;align-items:center;line-height:1.2}
+.bgrid button span{font-size:9px;font-weight:400;opacity:0.9}
+.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(40px,1fr));gap:4px}
+.cgrid button{background:var(--card);color:var(--tx);border:1px solid var(--bd);padding:10px 0;font-weight:700}
+.cgrid button.on{background:var(--pr);color:#fff;border-color:var(--pr)}
+.vlist p{margin:12px 0;padding-left:35px;position:relative}
+.vlist p b{position:absolute;left:0;color:var(--pr);font-size:14px;width:30px;text-align:right}
+.b-nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--bd)}
+.b-nav h2{margin:0;color:var(--pr)}
+.cat-0{background:#5d4037 !important} .cat-1{background:#f57c00 !important}
+.cat-2{background:#d32f2f !important} .cat-3{background:#7b1fa2 !important}
+.cat-4{background:#c2185b !important} .cat-5{background:#1976d2 !important}
+.cat-6{background:#0097a7 !important} .cat-7{background:#388e3c !important}
+.cat-8{background:#1b5e20 !important} .cat-9{background:#afb42b !important}
 </style><link rel="stylesheet" href="/mobile.css"></head><body><div class="w">
 <header><img id="lg" alt="Logo"><h1>Ministério de Intercessão</h1></header>
 
@@ -49,14 +65,26 @@ td select{width:100%;min-width:170px}.act{display:flex;gap:6px}.act button{paddi
   <div id="p2" hidden>
     <div class="card">
       <div class="row">
-        <label>Livro, Cap ou Verso<input id="bq" placeholder="Ex: Joao 3:16 ou Salmos 23"></label>
+        <label>Busca por texto ou referência<input id="bq" placeholder="Ex: Joao 3:16 ou Salmos 23"></label>
         <button id="bbuscar">Buscar</button>
         <button class="s" id="brandom">Aleatório</button>
       </div>
     </div>
-    <div class="card">
-      <div id="bresultado" style="line-height:1.6; font-size:16px;">
-        <p class="msg">Pesquise um livro ou versículo para começar.</p>
+    
+    <div id="bview">
+      <div class="card">
+        <div id="bbooks" class="bgrid"></div>
+        <div id="bchapters" class="cgrid" hidden></div>
+      </div>
+    </div>
+
+    <div id="bcontent" hidden>
+      <div class="card">
+        <div class="b-nav">
+          <h2 id="btitulo">João 3</h2>
+          <button class="s" id="bvoltar">Voltar</button>
+        </div>
+        <div id="bverses" class="vlist"></div>
       </div>
     </div>
     <p class="msg" style="text-align:center;">Tradução: Almeida Revista e Corrigida (ARC)</p>
@@ -89,26 +117,76 @@ $("mes").onchange=carregar;$("ano").onchange=carregar;$("pdf").onclick=()=>gerar
 $("t1").onclick=()=>aba(1);$("t2").onclick=()=>aba(2);
 function aba(n){$("p1").hidden=n!==1;$("p2").hidden=n!==2;$("t1").className=n===1?"on":"";$("t2").className=n===2?"on":""}
 
-async function buscarBiblia(ref){
-  const q=ref || $("bq").value.trim(); if(!q) return;
-  $("bresultado").innerHTML='<p class="msg">Buscando na Bíblia...</p>';
+// ---- Lógica da Bíblia (Holyrics Style)
+const BOOKS = [
+  {n:"Gênesis",s:"Gn",c:50,t:0},{n:"Êxodo",s:"Ex",c:40,t:0},{n:"Levítico",s:"Lv",c:27,t:0},{n:"Números",s:"Nm",c:36,t:0},{n:"Deuteronômio",s:"Dt",c:34,t:0},
+  {n:"Josué",s:"Js",c:24,t:1},{n:"Juízes",s:"Jz",c:21,t:1},{n:"Rute",s:"Rt",c:4,t:1},{n:"1 Samuel",s:"1Sm",c:31,t:1},{n:"2 Samuel",s:"2Sm",c:24,t:1},{n:"1 Reis",s:"1Rs",c:22,t:1},{n:"2 Reis",s:"2Rs",c:25,t:1},{n:"1 Crônicas",s:"1Cr",c:29,t:1},{n:"2 Crônicas",s:"2Cr",c:36,t:1},{n:"Esdras",s:"Ed",c:10,t:1},{n:"Neemias",s:"Ne",c:13,t:1},{n:"Ester",s:"Et",c:10,t:1},
+  {n:"Jó",s:"Jó",c:42,t:2},{n:"Salmos",s:"Sl",c:150,t:2},{n:"Provérbios",s:"Pv",c:31,t:2},{n:"Eclesiastes",s:"Ec",c:12,t:2},{n:"Cantares",s:"Ct",c:8,t:2},
+  {n:"Isaías",s:"Is",c:66,t:3},{n:"Jeremias",s:"Jr",c:52,t:3},{n:"Lamentações",s:"Lm",c:5,t:3},{n:"Ezequiel",s:"Ez",c:48,t:3},{n:"Daniel",s:"Dn",c:12,t:3},
+  {n:"Oseias",s:"Os",c:14,t:4},{n:"Joel",s:"Jl",c:3,t:4},{n:"Amós",s:"Am",c:9,t:4},{n:"Obadias",s:"Ob",c:1,t:4},{n:"Jonas",s:"Jn",c:4,t:4},{n:"Miqueias",s:"Mq",c:7,t:4},{n:"Naum",s:"Na",c:3,t:4},{n:"Habacuque",s:"Hc",c:3,t:4},{n:"Sofonias",s:"Sf",c:3,t:4},{n:"Ageu",s:"Ag",c:2,t:4},{n:"Zacarias",s:"Zc",c:14,t:4},{n:"Malaquias",s:"Ml",c:4,t:4},
+  {n:"Mateus",s:"Mt",c:28,t:5},{n:"Marcos",s:"Mc",c:16,t:5},{n:"Lucas",s:"Lc",c:24,t:5},{n:"João",s:"Jo",c:21,t:5},{n:"Atos",s:"At",c:28,t:6},
+  {n:"Romanos",s:"Rm",c:16,t:7},{n:"1 Coríntios",s:"1Co",c:16,t:7},{n:"2 Coríntios",s:"2Co",c:13,t:7},{n:"Gálatas",s:"Gl",c:6,t:7},{n:"Efésios",s:"Ef",c:6,t:7},{n:"Filipenses",s:"Fp",c:4,t:7},{n:"Colossenses",s:"Cl",c:4,t:7},{n:"1 Tessalonicenses",s:"1Ts",c:5,t:7},{n:"2 Tessalonicenses",s:"2Ts",c:3,t:7},{n:"1 Timóteo",s:"1Tm",c:6,t:7},{n:"2 Timóteo",s:"2Tm",c:4,t:7},{n:"Tito",s:"Tt",c:3,t:7},{n:"Filemom",s:"Fm",c:1,t:7},
+  {n:"Hebreus",s:"Hb",c:13,t:8},{n:"Tiago",s:"Tg",c:5,t:8},{n:"1 Pedro",s:"1Pe",c:5,t:8},{n:"2 Pedro",s:"2Pe",c:3,t:8},{n:"1 João",s:"1Jo",c:5,t:8},{n:"2 João",s:"2Jo",c:1,t:8},{n:"3 João",s:"3Jo",c:1,t:8},{n:"Judas",s:"Jd",c:1,t:8},{n:"Apocalipse",s:"Ap",c:22,t:9}
+];
+
+let selBook = null;
+
+function renderBooks(){
+  $("bbooks").innerHTML = BOOKS.map((b,i)=>`<button class="cat-${b.t}" onclick="selectBook(${i})">${b.s}<span>${b.n}</span></button>`).join("");
+  $("bbooks").hidden = false; $("bchapters").hidden = true; $("bcontent").hidden = true; $("bview").hidden = false;
+}
+
+function selectBook(i){
+  selBook = BOOKS[i];
+  $("bbooks").hidden = true;
+  $("bchapters").innerHTML = Array.from({length:selBook.c},(_,k)=>`<button onclick="selectChapter(${k+1})">${k+1}</button>`).join("");
+  $("bchapters").hidden = false;
+}
+
+async function selectChapter(c){
+  const ref = `${selBook.n} ${c}`;
+  $("btitulo").textContent = ref;
+  $("bview").hidden = true;
+  $("bcontent").hidden = false;
+  $("bverses").innerHTML = '<p class="msg">Carregando...</p>';
   try {
-    const r=await fetch(`https://bible-api.com/${encodeURIComponent(q)}?translation=almeida`);
-    const j=await r.json();
-    if(j.error) throw new Error(j.error);
-    let h=`<h2 style="color:var(--pr);margin-bottom:5px;">${j.reference}</h2>`;
-    h+=j.verses.map(v=>`<p style="margin:8px 0;"><small style="color:var(--mu);margin-right:8px;">${v.verse}</small>${v.text}</p>`).join("");
-    $("bresultado").innerHTML=h;
-    if(!ref) $("bq").value=j.reference;
-    $("bresultado").parentElement.scrollTop=0;
+    const r = await fetch(`https://bible-api.com/${encodeURIComponent(ref)}?translation=almeida`);
+    const j = await r.json();
+    $("bverses").innerHTML = j.verses.map(v=>`<p><b>${v.verse}</b> ${v.text}</p>`).join("");
   } catch(e) {
-    $("bresultado").innerHTML=`<p class="msg err">Não encontramos esse trecho. Tente ex: "Joao 3:16" ou "Salmos 23".</p>`;
+    $("bverses").innerHTML = '<p class="msg err">Erro ao carregar versículos.</p>';
   }
 }
-$("bbuscar").onclick=()=>buscarBiblia();
-$("brandom").onclick=()=>{
+
+$("bvoltar").onclick = ()=>{
+  if(!$("bcontent").hidden){ $("bcontent").hidden = true; $("bview").hidden = false; }
+  else if(!$("bchapters").hidden){ $("bchapters").hidden = true; $("bbooks").hidden = false; }
+};
+
+async function buscarBiblia(ref){
+  const q = ref || $("bq").value.trim(); if(!q) return;
+  $("bview").hidden = true;
+  $("bcontent").hidden = false;
+  $("btitulo").textContent = "Busca: " + q;
+  $("bverses").innerHTML = '<p class="msg">Buscando...</p>';
+  try {
+    const r = await fetch(`https://bible-api.com/${encodeURIComponent(q)}?translation=almeida`);
+    const j = await r.json();
+    if(j.error) throw new Error(j.error);
+    $("btitulo").textContent = j.reference;
+    $("bverses").innerHTML = j.verses.map(v=>`<p><b>${v.verse}</b> ${v.text}</p>`).join("");
+    if(!ref) $("bq").value = j.reference;
+  } catch(e) {
+    $("bverses").innerHTML = `<p class="msg err">Não encontramos esse trecho. Tente ex: "Joao 3:16" ou "Salmos 23".</p>`;
+  }
+}
+
+$("bbuscar").onclick = ()=>buscarBiblia();
+$("brandom").onclick = ()=>{
   const refs=["Joao 3:16","Salmos 23","Genesis 1:1","Mateus 5:1-12","1 Corintios 13","Filipenses 4:13","Josue 1:9","Isaias 41:10","Jeremias 29:11","Salmos 91"];
   buscarBiblia(refs[Math.floor(Math.random()*refs.length)]);
 };
-$("bq").onkeydown=e=>{if(e.key==="Enter")$("bbuscar").click()};
+$("bq").onkeydown = e=>{if(e.key==="Enter")$("bbuscar").click()};
+
+renderBooks();
 </script><script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js");</script></body></html>
