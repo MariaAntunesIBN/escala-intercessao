@@ -1,4 +1,4 @@
-const CACHE = "escala-v2";
+const CACHE = "escala-v3";
 const SHELL = [
   "/", "/index.html", "/admin.html", "/shared.js", "/mobile.css",
   "/vendor/jspdf.umd.min.js",
@@ -21,7 +21,7 @@ self.addEventListener("fetch", (e) => {
   const { request } = e;
   if (request.method !== "GET") return;
   const url = new URL(request.url);
-  if (url.origin !== self.location.origin) return;   // CDN (jsPDF): deixa o navegador cuidar
+  if (url.origin !== self.location.origin) return;   // CDN (bible-api): deixa o navegador cuidar
   if (url.pathname.startsWith("/api/")) return;      // API: sempre rede
 
   // Navegação: rede primeiro, cai para o cache se estiver offline
@@ -38,16 +38,19 @@ self.addEventListener("fetch", (e) => {
     return;
   }
 
-  // Demais arquivos estáticos: cache primeiro
+  // Demais estáticos: cache primeiro, atualizando em segundo plano (stale-while-revalidate)
   e.respondWith(
-    caches.match(request).then(
-      (cached) =>
-        cached ||
-        fetch(request).then((res) => {
-          const copy = res.clone();
-          caches.open(CACHE).then((c) => c.put(request, copy));
+    caches.match(request).then((cached) => {
+      const rede = fetch(request)
+        .then((res) => {
+          if (res && res.status === 200 && res.type === "basic") {
+            const copy = res.clone();
+            caches.open(CACHE).then((c) => c.put(request, copy));
+          }
           return res;
         })
-    )
+        .catch(() => cached);
+      return cached || rede;
+    })
   );
 });
