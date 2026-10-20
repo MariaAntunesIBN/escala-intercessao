@@ -27,17 +27,24 @@
 .cat-6{background:#0097a7 !important} .cat-7{background:#388e3c !important}
 .cat-8{background:#1b5e20 !important} .cat-9{background:#afb42b !important}
 </style><link rel="stylesheet" href="/mobile.css"></head><body>
-<header class="top"><div class="in"><img id="lg" alt="Igreja Batista Nacional de Sorriso"><div class="sep"></div><div><h1>Ministério de Intercessão</h1><p>Escala de servos</p></div></div></header>
+<header class="top"><div class="in"><a class="logo" href="/"><img id="lg" alt="Igreja Batista Nacional de Sorriso"></a><div class="sep"></div><div><h1>Ministério de Intercessão</h1><p>Escala de servos</p></div></div></header>
 <div class="w">
 
 <div class="main-content">
   <div class="tabs"><button id="t1" class="on">Escala</button><button id="t2">Bíblia de Estudo</button></div>
 
   <div id="p1">
-    <div class="card"><div class="row"><label>Mês<select id="mes"></select></label><label>Ano<input id="ano" type="number" min="2020" max="2100"></label>
+    <div class="card"><div class="row"><label>Mês<select id="mes"></select></label><label>Ano<select id="ano"></select></label>
     <button id="pdf" hidden>Baixar PDF</button></div></div>
-    <div class="card"><div class="tw"><table><thead><tr><th>Dia</th><th>Data</th><th>Início</th><th>Término</th><th>Servos</th></tr></thead><tbody id="tb"></tbody></table></div>
-    <div class="msg" id="msg"></div></div>
+    <div class="card paper">
+      <div class="paper-head"><img id="plg" alt="Igreja Batista Nacional de Sorriso">
+        <div><h2>MINISTÉRIO DE INTERCESSÃO</h2><p id="ptitulo"></p></div></div>
+      <div class="paper-body">
+        <div class="tw"><table><thead><tr><th>Dia</th><th>Servos</th><th>Data</th><th>Início</th><th>Término</th></tr></thead><tbody id="tb"></tbody></table></div>
+        <div class="cal" id="cal"></div>
+      </div>
+      <div class="msg" id="msg"></div>
+    </div>
   </div>
 
   <div id="p2" hidden>
@@ -78,18 +85,41 @@
 </div>
 <script src="shared.js"></script>
 <script>
-const $=id=>document.getElementById(id);$("lg").src=LOGO;let rows=[];
-const n=new Date();$("mes").innerHTML=MESES.map((m,i)=>`<option value="${i}">${m}</option>`).join("");$("mes").value=n.getMonth();$("ano").value=n.getFullYear();
-async function carregar(){const y=+$("ano").value,m=+$("mes").value;$("tb").innerHTML="";$("pdf").hidden=true;$("msg").textContent="Carregando...";
+const $=id=>document.getElementById(id);$("lg").src=LOGO;$("plg").src=LOGO;let rows=[];
+const n=new Date();let chaves=[];
+$("mes").innerHTML=MESES.map((m,i)=>`<option value="${i}">${m}</option>`).join("");
+async function iniciar(){
+  try{chaves=await (await fetch("/api/escala")).json()||[]}catch(e){chaves=[]}
+  const def=chaves.length?chaves[chaves.length-1]:`${n.getFullYear()}-${pad(n.getMonth()+1)}`;
+  const [dy,dm]=def.split("-").map(Number);
+  const anos=[...new Set([...chaves.map(k=>k.slice(0,4)),String(n.getFullYear()),String(dy)])].sort();
+  $("ano").innerHTML=anos.map(a=>`<option value="${a}">${a}</option>`).join("");
+  $("ano").value=dy;$("mes").value=dm-1;carregar()}
+async function carregar(){const y=+$("ano").value,m=+$("mes").value;$("tb").innerHTML="";$("pdf").hidden=true;
+$("ptitulo").textContent=MESES[m].toUpperCase()+"/"+y;renderCal(m,y);$("msg").textContent="Carregando...";
 if(!y){$("msg").textContent="";return}
 try{const r=await fetch(`/api/escala/${y}-${pad(m+1)}`);rows=await r.json()||[];
 if(!rows.length){$("msg").textContent="A escala deste mês ainda não foi publicada.";return}
 $("msg").textContent="";$("pdf").hidden=false;
 rows.forEach(s=>{const tr=document.createElement("tr");if(s.w===0)tr.className="dom";
 if(y===n.getFullYear()&&m===n.getMonth()&&s.d===n.getDate())tr.classList.add("hoje");
-const lbs=["Dia","Data","Início","Término","Servos"];[DIAS[s.w],`${pad(s.d)}/${pad(m+1)}/${y}`,s.i,s.f,s.nome||"-"].forEach((t,i)=>{const td=document.createElement("td");td.textContent=t;td.dataset.l=lbs[i];tr.append(td)});$("tb").append(tr)})}
+const lbs=["Dia","Servos","Data","Início","Término"];[DIAS[s.w],nomeSlot(s)||"—",`${pad(s.d)}/${pad(m+1)}/${y}`,s.i,s.f].forEach((t,i)=>{const td=document.createElement("td");td.textContent=t;td.dataset.l=lbs[i];tr.append(td)});$("tb").append(tr)})}
 catch(e){$("msg").textContent="Não foi possível carregar a escala."}}
-$("mes").onchange=carregar;$("ano").onchange=carregar;$("pdf").onclick=()=>gerarPdf(+$("ano").value,+$("mes").value,rows);carregar();renderCuriosidade();
+function renderCal(m,y){const first=new Date(y,m,1).getDay(),nd=new Date(y,m+1,0).getDate();
+const hj=(n.getFullYear()===y&&n.getMonth()===m)?n.getDate():0;
+let h='<div class="cal-top">'+MESES[m].toUpperCase()+" "+y+"</div><table><thead><tr>";
+["D","S","T","Q","Q","S","S"].forEach((d,i)=>h+=`<th${i===0?' class="sun"':""}>${d}</th>`);
+h+="</tr></thead><tbody>";
+const linhas=Math.ceil((first+nd)/7);
+for(let r=0;r<linhas;r++){h+="<tr>";
+for(let k=0;k<7;k++){const d=r*7+k-first+1;
+if(d<1||d>nd){h+='<td class="off"></td>';continue}
+const cls=[k===0?"sun":"",d===hj?"hoje":""].filter(Boolean).join(" ");
+h+=`<td${cls?' class="'+cls+'"':""}>${d}</td>`}
+h+="</tr>"}
+h+="</tbody></table>";$("cal").innerHTML=h}
+$("mes").onchange=carregar;$("ano").onchange=carregar;$("pdf").onclick=()=>gerarPdf(+$("ano").value,+$("mes").value,rows);
+iniciar();renderCuriosidade();initFooter();
 
 // ---- Lógica da Bíblia
 $("t1").onclick=()=>aba(1);$("t2").onclick=()=>aba(2);

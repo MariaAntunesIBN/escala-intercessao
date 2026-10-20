@@ -94,3 +94,70 @@ a{color:var(--pr)}
   .vlist p { font-size: 16px; padding-left: 30px; }
   .vlist p b { width: 25px; font-size: 13px; }
 }
+
+/* ===== Logo clicável no cabeçalho ===== */
+a.logo{display:inline-flex;align-items:center;text-decoration:none}
+a.logo img{display:block}
+
+/* ===== Botão Ver/Ocultar senha ===== */
+.pwbox{display:flex;gap:6px;align-items:stretch}
+.pwbox input{flex:1;min-width:0}
+.pwbox button{flex:none;white-space:nowrap}
+
+/* ===== Visão "igual ao PDF" (home somente leitura) ===== */
+.paper{background:#fff;color:#1b2430;padding:0;overflow:hidden}
+.paper-head{display:flex;align-items:center;gap:14px;padding:14px 16px;border-bottom:3px solid var(--pr)}
+.paper-head img{height:50px;width:auto;display:block}
+.paper-head h2{margin:0;font-size:18px;letter-spacing:.02em;color:#1b2430}
+.paper-head p{margin:4px 0 0;font-size:13px;color:var(--mu);letter-spacing:.1em}
+.paper-body{padding:12px 16px 16px}
+.paper .msg{padding:0 16px 14px}
+
+.paper-body table{width:100%;border-collapse:collapse;color:#1b2430}
+.paper-body th{background:var(--pr);color:#fff;border:1px solid var(--pr);font-size:13px;text-align:center;white-space:nowrap}
+.paper-body td{border:1px solid #c9d3dc;padding:6px 8px;text-align:center;white-space:nowrap;font-size:14px}
+.paper-body tr:nth-child(even) td{background:#f6f9fb}
+.paper-body tr.dom td{background:var(--sun)}
+.paper-body tr.hoje td{font-weight:700;outline:2px solid var(--pr);outline-offset:-2px}
+
+/* ===== Calendário (dentro do papel) ===== */
+.cal{margin-top:18px;max-width:420px}
+.cal-top{background:var(--pr);color:#fff;font-weight:700;text-align:center;padding:8px;border-radius:8px 8px 0 0;letter-spacing:.06em}
+.cal table{width:100%;border-collapse:collapse;background:#fff}
+.cal th{background:#eef3f7;color:#33414f;border:1px solid #d6dde5;padding:4px;font-size:12px;text-align:center;white-space:normal}
+.cal th.sun{color:var(--rd)}
+.cal td{border:1px solid #d6dde5;padding:6px 4px;text-align:center;white-space:normal;font-size:12px;color:#1b2430}
+.cal td.off{background:#f7f9fb}
+.cal td.sun{background:var(--sun)}
+.cal td.hoje{background:var(--pr);color:#fff;font-weight:700}
+
+/* ===== Vários servos no mesmo horário (chips) ===== */
+.slotbox{display:flex;flex-direction:column;gap:6px;min-width:190px}
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip{display:inline-flex;align-items:center;gap:4px;background:var(--sun);border:1px solid var(--bd);border-radius:999px;padding:3px 4px 3px 10px;font-size:12px;color:var(--tx);white-space:nowrap}
+.chip button{background:transparent;border:0;color:var(--rd);font-size:16px;line-height:1;padding:0 4px;cursor:pointer}
+.addsel{width:100%;min-width:0;font-size:13px;padding:6px 8px}
+
+/* ===== Rodapé fixo (somente celular) ===== */
+.appfoot{display:none}
+@media (max-width:640px){
+  body{padding-bottom:74px}
+  .appfoot{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:50;gap:8px;padding:8px 12px calc(8px + env(safe-area-inset-bottom));background:var(--card);border-top:1px solid var(--bd);box-shadow:0 -4px 12px rgba(0,0,0,.12)}
+  .appfoot .s,.appfoot a{flex:1;display:flex;align-items:center;justify-content:center;min-height:44px;border-radius:10px;font-weight:600;text-decoration:none}
+  .appfoot a{background:var(--pr);color:#fff}
+  .paper-head img{height:40px}
+  .paper-head h2{font-size:15px}
+  .paper-body{padding:10px 8px 12px}
+  /* Mantém a tabela da visão PDF como tabela real no celular */
+  .paper-body .tw{overflow-x:auto}
+  .paper-body .tw table{display:table;width:100%}
+  .paper-body .tw thead{display:table-header-group}
+  .paper-body .tw tbody{display:table-row-group}
+  .paper-body .tw tr{display:table-row;border:0;padding:0;margin:0;background:transparent}
+  .paper-body .tw td{display:table-cell;text-align:center;white-space:nowrap;padding:4px 5px;font-size:11px;background:transparent}
+  .paper-body .tw tr:nth-child(even) td{background:#f6f9fb}
+  .paper-body .tw tr.dom td{background:var(--sun)}
+  .paper-body .tw tr.hoje td{outline:2px solid var(--pr);outline-offset:-2px;font-weight:700}
+  .paper-body .tw td::before{content:none}
+  .paper-body .tw th{font-size:10px;padding:4px 3px;white-space:normal}
+}

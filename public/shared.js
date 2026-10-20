@@ -61,6 +61,21 @@ function renderCuriosidade(){
   const el = document.getElementById("curiosidade");
   if(el) el.innerHTML = `<h3>Curiosidade do Dia</h3><p>${c.t}</p><small>Ref: ${c.r}</small>`;
 }
+// Junta os nomes de um horário: "A / B" (um casal continua sendo um único registro)
+const nomeSlot = (l) => {
+  const x = l || {};
+  const ns = Array.isArray(x.nomes) ? x.nomes.filter(Boolean) : [];
+  return ns.length ? ns.join(" / ") : (x.nome || "");
+};
+// Rodapé fixo no celular (Voltar / Início)
+function initFooter() {
+  if (document.querySelector(".appfoot")) return;
+  const b = document.createElement("div");
+  b.className = "appfoot";
+  b.innerHTML = '<button type="button" class="s" id="fvoltar">Voltar</button><a id="fhome" href="/">Início</a>';
+  document.body.append(b);
+  b.querySelector("#fvoltar").onclick = () => { if (history.length > 1) history.back(); else location.href = "/"; };
+}
 const pad=n=>String(n).padStart(2,"0");
 function slotsDoMes(y,m){const s=[],nd=new Date(y,m+1,0).getDate();
 for(let d=1;d<=nd;d++){const w=new Date(y,m,d).getDay();
@@ -80,7 +95,7 @@ fill("#31859C");d.rect(X,y0,TW,hh,"FD");d.setTextColor(255);d.setFontSize(10);
 let cx=X;["","SERVOS","DATA","INÍCIO","TÉRMINO"].forEach((t,i)=>{if(t)d.text(t,cx+cols[i]/2,y0+5.4,{align:"center"});cx+=cols[i]});
 rows.forEach((s,i)=>{const yy=y0+hh+i*rh;if(s.w===0){fill("#C5D9F1");d.rect(X,yy,TW,rh,"F")}
 d.setTextColor(0);d.setFontSize(Math.min(10,rh+2));d.setFont("helvetica","bold");let x=X;
-[DIAS[s.w],s.nome||"-",pad(s.d)+"/"+pad(m+1)+"/"+y,s.i,s.f].forEach((t,j)=>{
+[DIAS[s.w],nomeSlot(s)||"-",pad(s.d)+"/"+pad(m+1)+"/"+y,s.i,s.f].forEach((t,j)=>{
 if(j===0)d.text(t,x+1.5,yy+rh*.68);else d.text(t,x+cols[j]/2,yy+rh*.68,{align:"center"});x+=cols[j]});
 d.setLineWidth(.2);d.line(X,yy+rh,X+TW,yy+rh)});
 d.setLineWidth(.5);d.rect(X,y0,TW,hh+rows.length*rh);

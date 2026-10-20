@@ -27,13 +27,23 @@ export default async (req) => {
   if (req.method === "PUT") {
     const b = await req.json();
     const hora = (h) => (/^\d{2}:\d{2}$/.test(h) ? h : "");
-    const linhas = (Array.isArray(b.linhas) ? b.linhas : []).slice(0, 120).map((l) => ({
-      d: Math.min(31, Math.max(1, parseInt(l.d) || 1)),
-      w: Math.min(6, Math.max(0, parseInt(l.w) || 0)),
-      i: hora(l.i),
-      f: hora(l.f),
-      nome: String(l.nome || "").trim().slice(0, 120),
-    }));
+    // Cada horário guarda uma lista de nomes (nomes[]) e o texto já juntado (nome)
+    const nomesDe = (l) =>
+      (Array.isArray(l.nomes) ? l.nomes : l.nome ? [l.nome] : [])
+        .map((n) => String(n || "").trim().slice(0, 120))
+        .filter(Boolean)
+        .slice(0, 8);
+    const linhas = (Array.isArray(b.linhas) ? b.linhas : []).slice(0, 120).map((l) => {
+      const nomes = nomesDe(l);
+      return {
+        d: Math.min(31, Math.max(1, parseInt(l.d) || 1)),
+        w: Math.min(6, Math.max(0, parseInt(l.w) || 0)),
+        i: hora(l.i),
+        f: hora(l.f),
+        nomes,
+        nome: nomes.join(" / "),
+      };
+    });
     await store.setJSON(ym, linhas);
     return json({ ok: true, total: linhas.length });
   }
