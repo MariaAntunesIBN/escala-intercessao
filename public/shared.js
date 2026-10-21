@@ -80,6 +80,15 @@ function initFooter() {
     (naAdmin ? "" : `<a class="admic" href="/admin.html" title="Administração" aria-label="Administração">${ICONE_ADMIN}</a>`);
   document.body.append(b);
   b.querySelector("#fvoltar").onclick = () => { if (history.length > 1) history.back(); else location.href = "/"; };
+  
+  // Observador para remover o selo Netlify se ele for injetado depois
+  const removerNetlify = () => {
+    const selos = document.querySelectorAll('#netlify-drawer, .netlify-drawer, [data-netlify-identity-menu], .netlify-badge, .netlify-badge-wrapper, [id*="netlify"], [class*="netlify"], iframe[src*="netlify"]');
+    selos.forEach(s => s.remove());
+  };
+  removerNetlify();
+  const obs = new MutationObserver(removerNetlify);
+  obs.observe(document.body, { childList: true, subtree: true });
 }
 const pad=n=>String(n).padStart(2,"0");
 function slotsDoMes(y,m){const s=[],nd=new Date(y,m+1,0).getDate();
