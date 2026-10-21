@@ -24,7 +24,7 @@
 
   <div id="p1"><div class="card"><div class="row"><label>Mês<select id="mes"></select></label><label>Ano<input id="ano" type="number" min="2020" max="2100"></label>
   <button class="s" id="rod">Preencher em rodízio</button><button class="s" id="lim">Limpar</button></div></div>
-  <div class="card"><div class="msg" style="margin:0 0 8px">Pode escolher mais de um servo no mesmo horário. Se não for casal, os nomes aparecem separados por “/”.</div>
+  <div class="card"><div class="msg" style="margin:0 0 8px">Pode escolher mais de um servo no mesmo horário. Se não for casal, os nomes aparecem separados por “/”. <b id="nservos"></b></div>
   <div class="tw"><table><thead><tr><th>Dia</th><th>Data</th><th>Início</th><th>Término</th><th>Servos</th></tr></thead><tbody id="tb"></tbody></table></div>
   <div class="row" style="margin-top:12px"><button id="pub">Salvar e publicar</button><button class="s" id="pdf">Baixar PDF</button><button class="d" id="del">Excluir escala do mês</button></div>
   <div class="msg" id="emsg"></div></div></div>
@@ -83,6 +83,7 @@ function slotCelula(i){
   se.onchange=()=>{const v=se.value;if(!v)return;sel[i].push(v);refresh()};
   box.append(chips,se);td.append(box);refresh();return td}
 function renderEscala(){const m=+$("mes").value,y=+$("ano").value,tb=$("tb");tb.innerHTML="";
+$("nservos").textContent="("+servosAtivos().length+" servos disponíveis)";
 slots.forEach((s,i)=>{const tr=document.createElement("tr");if(s.w===0)tr.className="dom";
 const lbs=["Dia","Data","Início","Término"];[DIAS[s.w],`${pad(s.d)}/${pad(m+1)}/${y}`,s.i,s.f].forEach((t,j)=>{const td=document.createElement("td");td.textContent=t;td.dataset.l=lbs[j];tr.append(td)});
 tr.append(slotCelula(i));tb.append(tr)})}
@@ -117,5 +118,12 @@ $("cancel").onclick=limpar;
 $("salvar").onclick=()=>run(async()=>{const b={nome:$("nome").value,celular:$("cel").value,tipo:$("tipo").value};if(edit)await api("/api/servos/"+edit,"PUT",b);else await api("/api/servos","POST",b);limpar()});
 $("cel").oninput=e=>e.target.value=fmt(e.target.value);$("q").oninput=renderServos;$("f").onchange=renderServos;
 if(senha)entrar().catch(()=>sair());else $("login").hidden=false;
-renderCuriosidade();initFooter();
-</script><script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js");</script></body></html>
+renderCuriosidade();if(typeof initFooter==="function")initFooter();
+</script><script>
+// Ao trocar a versão do Service Worker, recarrega uma vez para ficar tudo na mesma versão.
+if("serviceWorker" in navigator){
+  let recarregou=false;
+  navigator.serviceWorker.addEventListener("controllerchange",()=>{if(recarregou)return;recarregou=true;location.reload()});
+  navigator.serviceWorker.register("/sw.js");
+}
+</script></body></html>

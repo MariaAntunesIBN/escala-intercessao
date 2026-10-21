@@ -99,6 +99,10 @@ a{color:var(--pr)}
 a.logo{display:inline-flex;align-items:center;text-decoration:none}
 a.logo img{display:block}
 
+/* ===== Ícone de administração (cabeçalho, canto superior direito) ===== */
+.top .adm{margin-left:auto;display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:10px;color:#fff;opacity:.78;text-decoration:none;flex:none}
+.top .adm:hover,.top .adm:focus-visible{opacity:1;background:rgba(255,255,255,.14)}
+
 /* ===== Botão Ver/Ocultar senha ===== */
 .pwbox{display:flex;gap:6px;align-items:stretch}
 .pwbox input{flex:1;min-width:0}
@@ -145,6 +149,7 @@ a.logo img{display:block}
   .appfoot{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:50;gap:8px;padding:8px 12px calc(8px + env(safe-area-inset-bottom));background:var(--card);border-top:1px solid var(--bd);box-shadow:0 -4px 12px rgba(0,0,0,.12)}
   .appfoot .s,.appfoot a{flex:1;display:flex;align-items:center;justify-content:center;min-height:44px;border-radius:10px;font-weight:600;text-decoration:none}
   .appfoot a{background:var(--pr);color:#fff}
+  .appfoot .admic{flex:none;width:52px;background:var(--card);color:var(--pr);border:1px solid var(--bd)}
   .paper-head img{height:40px}
   .paper-head h2{font-size:15px}
   .paper-body{padding:10px 8px 12px}

@@ -67,12 +67,17 @@ const nomeSlot = (l) => {
   const ns = Array.isArray(x.nomes) ? x.nomes.filter(Boolean) : [];
   return ns.length ? ns.join(" / ") : (x.nome || "");
 };
-// Rodapé fixo no celular (Voltar / Início)
+// Ícone de administração (engrenagem), usado no cabeçalho e no rodapé
+const ICONE_ADMIN = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>';
+// Rodapé fixo no celular (Voltar / Início / admin)
 function initFooter() {
   if (document.querySelector(".appfoot")) return;
+  const naAdmin = /(^|\/)admin(\.html)?$/.test(location.pathname);
   const b = document.createElement("div");
   b.className = "appfoot";
-  b.innerHTML = '<button type="button" class="s" id="fvoltar">Voltar</button><a id="fhome" href="/">Início</a>';
+  b.innerHTML =
+    '<button type="button" class="s" id="fvoltar">Voltar</button><a id="fhome" href="/">Início</a>' +
+    (naAdmin ? "" : `<a class="admic" href="/admin.html" title="Administração" aria-label="Administração">${ICONE_ADMIN}</a>`);
   document.body.append(b);
   b.querySelector("#fvoltar").onclick = () => { if (history.length > 1) history.back(); else location.href = "/"; };
 }
@@ -108,4 +113,10 @@ fill("#3C3C3C");d.rect(cl,y0-13,cw,10,"F");d.setFontSize(13);
 const first=new Date(y,m,1).getDay(),nd=new Date(y,m+1,0).getDate();
 d.setFontSize(15);for(let k=0;k<nd;k++){const p=first+k,r=Math.floor(p/7),c=p%7;
 if(c===0)d.setTextColor(229,57,53);else d.setTextColor(40);d.text(String(k+1),cl+c*cell+cell/2,y0-3+r*13+9,{align:"center"})}
-d.save(`Escala_Intercessao_${MESES[m]}_${y}.pdf`)}
+const arquivo=`Escala_Intercessao_${MESES[m]}_${y}.pdf`;
+try{d.save(arquivo)}
+catch(e){
+  // Alguns navegadores móveis bloqueiam o download direto: abre o PDF em nova aba.
+  const a=document.createElement("a");a.href=d.output("bloburl");a.download=arquivo;a.target="_blank";a.rel="noopener";
+  document.body.append(a);a.click();a.remove();
+}}

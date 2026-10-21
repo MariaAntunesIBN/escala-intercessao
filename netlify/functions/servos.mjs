@@ -29,8 +29,17 @@ export default async (req) => {
     celular: String(b.celular || "").replace(/\D/g, "").slice(0, 13),
     tipo: tipoDe(b),
   });
+  // Registros antigos podem não ter "ativo"/"celular": normaliza para não sumirem da lista.
+  const completo = (s) => ({
+    id: s.id,
+    nome: String(s.nome || "").trim(),
+    celular: String(s.celular || "").replace(/\D/g, ""),
+    tipo: tipoDe(s),
+    ativo: s.ativo !== false,
+    criadoEm: s.criadoEm || "",
+  });
 
-  if (req.method === "GET") return json(lista.map((s) => ({ tipo: tipoDe(s), ...s })));
+  if (req.method === "GET") return json(lista.map(completo));
 
   if (req.method === "POST") {
     const { nome, celular, tipo } = limpar(await req.json());

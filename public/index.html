@@ -27,7 +27,7 @@
 .cat-6{background:#0097a7 !important} .cat-7{background:#388e3c !important}
 .cat-8{background:#1b5e20 !important} .cat-9{background:#afb42b !important}
 </style><link rel="stylesheet" href="/mobile.css"></head><body>
-<header class="top"><div class="in"><a class="logo" href="/"><img id="lg" alt="Igreja Batista Nacional de Sorriso"></a><div class="sep"></div><div><h1>Ministério de Intercessão</h1><p>Escala de servos</p></div></div></header>
+<header class="top"><div class="in"><a class="logo" href="/"><img id="lg" alt="Igreja Batista Nacional de Sorriso"></a><div class="sep"></div><div><h1>Ministério de Intercessão</h1><p>Escala de servos</p></div><a class="adm" href="/admin.html" title="Administração" aria-label="Administração"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></a></div></header>
 <div class="w">
 
 <div class="main-content">
@@ -74,7 +74,6 @@
     </div>
     <p class="msg" style="text-align:center;">Tradução: Almeida (João Ferreira de Almeida)</p>
   </div>
-  <p class="msg"><a href="/admin.html">Administração</a></p>
 </div>
 
 <div class="sidebar">
@@ -119,7 +118,7 @@ h+=`<td${cls?' class="'+cls+'"':""}>${d}</td>`}
 h+="</tr>"}
 h+="</tbody></table>";$("cal").innerHTML=h}
 $("mes").onchange=carregar;$("ano").onchange=carregar;$("pdf").onclick=()=>gerarPdf(+$("ano").value,+$("mes").value,rows);
-iniciar();renderCuriosidade();initFooter();
+iniciar();renderCuriosidade();if(typeof initFooter==="function")initFooter();
 
 // ---- Lógica da Bíblia
 $("t1").onclick=()=>aba(1);$("t2").onclick=()=>aba(2);
@@ -153,42 +152,58 @@ function selectBook(i){
   $("bchapters").hidden = false;
 }
 
-async function selectChapter(c){
-  const ref = `${selBook.n} ${c}`;
-  $("btitulo").textContent = ref;
+// Baixa uma passagem com cache local (funciona offline depois da 1ª consulta)
+// e uma nova tentativa automática em caso de falha/limite de requisições.
+const chaveCache = (ref) => "biblia:" + semAcento(ref).toLowerCase().replace(/\s+/g, "");
+async function textoBiblico(ref){
+  const k = chaveCache(ref);
+  try { const c = localStorage.getItem(k); if (c) return JSON.parse(c); } catch(e){}
+  let erro;
+  for (let t = 0; t < 2; t++) {
+    try {
+      const r = await fetch(`https://bible-api.com/${encodeURIComponent(semAcento(ref))}?translation=almeida`);
+      if (r.status === 429) throw new Error("Muitas consultas seguidas. Aguarde alguns segundos e tente novamente.");
+      if (!r.ok) throw new Error("Serviço indisponível no momento (" + r.status + ").");
+      const j = await r.json();
+      if (j.error) throw new Error("Referência não encontrada.");
+      if (!j.verses || !j.verses.length) throw new Error("Nenhum versículo encontrado.");
+      try { localStorage.setItem(k, JSON.stringify(j)); } catch(e){}
+      return j;
+    } catch(e) { erro = e; await new Promise(s => setTimeout(s, 900)); }
+  }
+  throw erro;
+}
+function mostrarVersos(j){
+  $("btitulo").textContent = j.reference || $("btitulo").textContent;
+  $("bverses").innerHTML = j.verses.map(v => `<p><b>${v.verse}</b> ${v.text}</p>`).join("");
+}
+async function carregarPassagem(ref, busca){
+  $("btitulo").textContent = busca ? "Busca: " + ref : ref;
   $("bview").hidden = true;
   $("bcontent").hidden = false;
   $("bverses").innerHTML = '<p class="msg">Carregando...</p>';
   try {
-    const r = await fetch(`https://bible-api.com/${encodeURIComponent(semAcento(ref))}?translation=almeida`);
-    const j = await r.json();
-    $("bverses").innerHTML = j.verses.map(v=>`<p><b>${v.verse}</b> ${v.text}</p>`).join("");
+    const j = await textoBiblico(ref);
+    mostrarVersos(j);
+    if (busca) $("bq").value = j.reference || ref;
   } catch(e) {
-    $("bverses").innerHTML = '<p class="msg err">Erro ao carregar versículos.</p>';
+    $("bverses").innerHTML = `<p class="msg err">${e.message || "Não foi possível carregar."}</p>`;
+    const b = document.createElement("button");
+    b.className = "s"; b.textContent = "Tentar novamente";
+    b.onclick = () => carregarPassagem(ref, busca);
+    $("bverses").append(b);
   }
 }
+function selectChapter(c){ carregarPassagem(`${selBook.n} ${c}`, false); }
 
 $("bvoltar").onclick = ()=>{
   if(!$("bcontent").hidden){ $("bcontent").hidden = true; $("bview").hidden = false; }
   else if(!$("bchapters").hidden){ $("bchapters").hidden = true; $("bbooks").hidden = false; }
 };
 
-async function buscarBiblia(ref){
+function buscarBiblia(ref){
   const q = ref || $("bq").value.trim(); if(!q) return;
-  $("bview").hidden = true;
-  $("bcontent").hidden = false;
-  $("btitulo").textContent = "Busca: " + q;
-  $("bverses").innerHTML = '<p class="msg">Buscando...</p>';
-  try {
-    const r = await fetch(`https://bible-api.com/${encodeURIComponent(semAcento(q))}?translation=almeida`);
-    const j = await r.json();
-    if(j.error) throw new Error(j.error);
-    $("btitulo").textContent = j.reference;
-    $("bverses").innerHTML = j.verses.map(v=>`<p><b>${v.verse}</b> ${v.text}</p>`).join("");
-    if(!ref) $("bq").value = j.reference;
-  } catch(e) {
-    $("bverses").innerHTML = `<p class="msg err">Não encontramos esse trecho. Tente ex: "Joao 3:16" ou "Salmos 23".</p>`;
-  }
+  carregarPassagem(q, true);
 }
 
 $("bbuscar").onclick = ()=>buscarBiblia();
@@ -199,4 +214,11 @@ $("brandom").onclick = ()=>{
 $("bq").onkeydown = e=>{if(e.key==="Enter")$("bbuscar").click()};
 
 renderBooks();
-</script><script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js");</script></body></html>
+</script><script>
+// Ao trocar a versão do Service Worker, recarrega uma vez para ficar tudo na mesma versão.
+if("serviceWorker" in navigator){
+  let recarregou=false;
+  navigator.serviceWorker.addEventListener("controllerchange",()=>{if(recarregou)return;recarregou=true;location.reload()});
+  navigator.serviceWorker.register("/sw.js");
+}
+</script></body></html>
