@@ -1,12 +1,35 @@
-const CACHE = "escala-v2";
+const CACHE = "escala-v12";
 const SHELL = [
-  "/", "/index.html", "/admin.html", "/shared.js", "/mobile.css",
+  "/", "/index.html", "/admin.html", "/versiculos.js", "/shared.js", "/mobile.css",
   "/vendor/jspdf.umd.min.js",
   "/manifest.webmanifest", "/icon-192.png", "/icon-512.png", "/apple-touch-icon.png"
 ];
 
+// Páginas e código do app sempre vêm da rede (evita HTML novo com JS antigo).
+const sempreRede = (p) => /\.(html|js|css|webmanifest)$/.test(p);
+
+async function redePrimeiro(request) {
+  try {
+    const res = await fetch(request);
+    if (res && res.status === 200) {
+      const copy = res.clone();
+      caches.open(CACHE).then((c) => c.put(request, copy));
+    }
+    return res;
+  } catch (e) {
+    const cached = await caches.match(request);
+    return cached || caches.match("/index.html");
+  }
+}
+
 self.addEventListener("install", (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));
+  // Baixa cada arquivo individualmente: uma falha isolada não impede a instalação.
+  e.waitUntil(
+    caches
+      .open(CACHE)
+      .then((c) => Promise.all(SHELL.map((u) => c.add(u).catch(() => null))))
+      .then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener("activate", (e) => {
@@ -21,33 +44,28 @@ self.addEventListener("fetch", (e) => {
   const { request } = e;
   if (request.method !== "GET") return;
   const url = new URL(request.url);
-  if (url.origin !== self.location.origin) return;   // CDN (jsPDF): deixa o navegador cuidar
+  if (url.origin !== self.location.origin) return;   // CDN (bible-api): deixa o navegador cuidar
   if (url.pathname.startsWith("/api/")) return;      // API: sempre rede
 
-  // Navegação: rede primeiro, cai para o cache se estiver offline
-  if (request.mode === "navigate") {
-    e.respondWith(
-      fetch(request)
-        .then((res) => {
-          const copy = res.clone();
-          caches.open(CACHE).then((c) => c.put(request, copy));
-          return res;
-        })
-        .catch(() => caches.match(request).then((r) => r || caches.match("/index.html")))
-    );
+  // Navegação e código do app: rede primeiro, cache apenas se estiver offline
+  if (request.mode === "navigate" || sempreRede(url.pathname)) {
+    e.respondWith(redePrimeiro(request));
     return;
   }
 
-  // Demais arquivos estáticos: cache primeiro
+  // Demais estáticos (fontes, imagens, vendor): cache primeiro, atualizando em segundo plano
   e.respondWith(
-    caches.match(request).then(
-      (cached) =>
-        cached ||
-        fetch(request).then((res) => {
-          const copy = res.clone();
-          caches.open(CACHE).then((c) => c.put(request, copy));
+    caches.match(request).then((cached) => {
+      const rede = fetch(request)
+        .then((res) => {
+          if (res && res.status === 200 && res.type === "basic") {
+            const copy = res.clone();
+            caches.open(CACHE).then((c) => c.put(request, copy));
+          }
           return res;
         })
-    )
+        .catch(() => cached);
+      return cached || rede;
+    })
   );
 });

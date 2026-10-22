@@ -11,3 +11,32 @@
   for = "/manifest.webmanifest"
   [headers.values]
     Content-Type = "application/manifest+json"
+
+# Cabeçalhos gerais de segurança
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+# HTML/JS/CSS do app nunca ficam em cache do navegador (evita HTML novo + JS antigo).
+# O funcionamento offline é garantido pelo Service Worker.
+[[headers]]
+  for = "/"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/shared.js"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/mobile.css"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
