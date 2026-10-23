@@ -1,4 +1,4 @@
-const CACHE = "escala-v12";
+const CACHE = "escala-v13";
 const SHELL = [
   "/", "/index.html", "/admin.html", "/versiculos.js", "/shared.js", "/mobile.css",
   "/vendor/jspdf.umd.min.js",
@@ -32,12 +32,27 @@ self.addEventListener("install", (e) => {
   );
 });
 
+// Recarrega as páginas abertas para que saiam da versão antiga imediatamente.
+async function recarregarClientes() {
+  const paginas = await self.clients.matchAll({ type: "window" });
+  paginas.forEach((c) => {
+    try { c.navigate(c.url); } catch (e) { /* ignora */ }
+  });
+}
+
 self.addEventListener("activate", (e) => {
   e.waitUntil(
     caches.keys()
       .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
       .then(() => self.clients.claim())
+      .then(recarregarClientes)
+      .catch(() => {})
   );
+});
+
+// Permite que a página peça a troca imediata para a versão nova.
+self.addEventListener("message", (e) => {
+  if (e.data && e.data.type === "SKIP_WAITING") self.skipWaiting();
 });
 
 self.addEventListener("fetch", (e) => {

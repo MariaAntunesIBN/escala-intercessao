@@ -85,3 +85,16 @@ catch(e){
   const a=document.createElement("a");a.href=d.output("bloburl");a.download=arquivo;a.target="_blank";a.rel="noopener";
   document.body.append(a);a.click();a.remove();
 }}
+
+// Atualização do PWA: procura versão nova ao abrir e ao voltar para o app,
+// e pede a troca imediata quando houver uma versão esperando.
+if("serviceWorker" in navigator){
+  const trocar=(w)=>{try{w&&w.postMessage({type:"SKIP_WAITING"})}catch(e){}};
+  navigator.serviceWorker.register("/sw.js").then((reg)=>{
+    trocar(reg.waiting);trocar(reg.installing);
+    reg.addEventListener("updatefound",()=>trocar(reg.installing));
+    const atualizar=()=>reg.update().catch(()=>{});
+    atualizar();
+    document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")atualizar()});
+  }).catch(()=>{});
+}
