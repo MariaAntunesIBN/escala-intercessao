@@ -40,3 +40,11 @@
   for = "/mobile.css"
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
+
+# Página de limpeza total: usada manualmente quando um aparelho fica preso em versão antiga.
+# O cabeçalho Clear-Site-Data apaga cache e dados do site no navegador (inclusive o Service Worker).
+[[headers]]
+  for = "/reset.html"
+  [headers.values]
+    Cache-Control = "no-store, max-age=0"
+    Clear-Site-Data = "\"cache\", \"storage\""

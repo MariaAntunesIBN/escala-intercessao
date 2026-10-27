@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Atualizar aplicativo</title>
+<style>
+body{font-family:system-ui,Segoe UI,Arial,sans-serif;background:#f4f6f8;color:#222;margin:0;display:flex;min-height:100vh;align-items:center;justify-content:center}
+.box{background:#fff;border:1px solid #dfe3e8;border-radius:12px;padding:24px;max-width:420px;margin:16px;text-align:center;box-shadow:0 6px 20px rgba(0,0,0,.08)}
+h1{font-size:18px;margin:0 0 8px;color:#31859c}
+p{font-size:14px;line-height:1.5;margin:8px 0}
+a.btn{display:inline-block;margin-top:14px;background:#31859c;color:#fff;text-decoration:none;padding:12px 18px;border-radius:8px;font-weight:700}
+#st{font-size:13px;color:#666;margin-top:10px}
+</style></head><body>
+<div class="box">
+  <h1>Atualizando o aplicativo</h1>
+  <p>Apagando o cache antigo guardado no aparelho. Aguarde alguns segundos.</p>
+  <div id="st">Limpando...</div>
+  <a class="btn" href="/" id="ir">Abrir o aplicativo</a>
+  <p style="font-size:12px;color:#888">Se a mensagem continuar em "Limpando...", feche esta aba e abra o aplicativo novamente.</p>
+</div>
+<script>
+(async function(){
+  const st=document.getElementById("st");
+  const passos=[];
+  try{
+    if("serviceWorker" in navigator){
+      const rs=await navigator.serviceWorker.getRegistrations();
+      await Promise.all(rs.map(r=>r.unregister()));
+      passos.push("service worker removido");
+    }
+  }catch(e){}
+  try{
+    if(window.caches){
+      const ks=await caches.keys();
+      await Promise.all(ks.map(k=>caches.delete(k)));
+      passos.push("cache apagado");
+    }
+  }catch(e){}
+  try{ localStorage.clear(); sessionStorage.clear(); passos.push("dados locais limpos"); }catch(e){}
+  st.textContent = passos.length ? ("Concluído: " + passos.join(", ") + ".") : "Nada para limpar.";
+  setTimeout(()=>{ location.replace("/?v=" + Date.now()); }, 1500);
+})();
+</script>
+</body></html>
