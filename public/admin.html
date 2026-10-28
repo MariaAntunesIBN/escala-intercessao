@@ -75,22 +75,25 @@ function slotCelula(i){
   const td=document.createElement("td");td.dataset.l="Servos";
   const box=document.createElement("div");box.className="slotbox";
   const chips=document.createElement("div");chips.className="chips";
-  const se=document.createElement("select");se.className="addsel";
+  const holder=document.createElement("span");
   const refresh=()=>{
     chips.innerHTML="";
     sel[i].forEach((nome,j)=>{const c=document.createElement("span");c.className="chip";c.textContent=nome;
       const x=document.createElement("button");x.type="button";x.textContent="×";x.title="Remover";
       x.onclick=()=>{sel[i].splice(j,1);refresh()};c.append(x);chips.append(c)});
-    se.innerHTML="";const o0=document.createElement("option");o0.value="";o0.textContent="+ adicionar servo";se.append(o0);
+    // O <select> é recriado a cada mudança: assim os já escolhidos aparecem marcados
+    // já na primeira vez que a lista é aberta.
+    const se=document.createElement("select");se.className="addsel";
+    const o0=document.createElement("option");o0.value="";o0.textContent="+ adicionar servo";se.append(o0);
     // Todos os servos continuam disponíveis na lista; os já escolhidos apenas aparecem marcados.
     const fora=new Set();sel.forEach((l,k)=>{if(k!==i)l.forEach(n=>fora.add(n))});
     servosAtivos().forEach(n=>{const aqui=sel[i].includes(n),o=document.createElement("option");o.value=n;
       o.textContent=n+(aqui?"  ✓ neste horário":fora.has(n)?"  • já escalado":"");
       o.className=aqui?"ja-aqui":fora.has(n)?"ja-fora":"";
       se.append(o)});
-    se.value=""};
-  se.onchange=()=>{const v=se.value;if(!v)return;sel[i].push(v);refresh()};
-  box.append(chips,se);td.append(box);refresh();return td}
+    se.onchange=()=>{const v=se.value;if(!v)return;sel[i].push(v);refresh()};
+    holder.replaceChildren(se)};
+  box.append(chips,holder);td.append(box);refresh();return td}
 function renderEscala(){const m=+$("mes").value,y=+$("ano").value,tb=$("tb");tb.innerHTML="";
 $("nservos").textContent="("+servosAtivos().length+" servos disponíveis)";
 slots.forEach((s,i)=>{const tr=document.createElement("tr");if(s.w===0)tr.className="dom";
