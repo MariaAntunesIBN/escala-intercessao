@@ -154,6 +154,12 @@ a.logo img{display:block}
 .chip button{background:transparent;border:0;color:var(--rd);font-size:16px;line-height:1;padding:0 4px;cursor:pointer}
 .addsel{width:100%;min-width:0;font-size:13px;padding:6px 8px}
 
+/* ===== Selo "Powered by Netlify" =====
+   O Netlify injeta um iframe fixo (id="nl-badge-frame") no canto inferior direito,
+   que cobria os botões do rodapé. O nome não contém "netlify", então precisa ser
+   escondido por id/título. */
+#nl-badge-frame,iframe[id^="nl-"],iframe[title*="Netlify"]{display:none !important;visibility:hidden !important;opacity:0 !important;pointer-events:none !important;width:0 !important;height:0 !important}
+
 /* ===== Rodapé fixo (somente celular) ===== */
 .appfoot{display:none}
 @media (max-width:640px){
@@ -179,6 +185,7 @@ a.logo img{display:block}
   .paper-body .tw th{font-size:10px;padding:4px 3px;white-space:normal}
 
   /* Remove sobreposição do selo Netlify no rodapé mobile (brute-force total) */
+  #nl-badge-frame, iframe[id^="nl-"], iframe[title*="Netlify"],
   #netlify-drawer, .netlify-drawer, [data-netlify-identity-menu], .netlify-badge, .netlify-badge-wrapper, 
   [id*="netlify"], [class*="netlify"], iframe[src*="netlify"], div[class*="netlify"] {
     display: none !important;

@@ -37,9 +37,10 @@ function initFooter() {
   document.body.append(b);
   b.querySelector("#fvoltar").onclick = () => { if (history.length > 1) history.back(); else location.href = "/"; };
   
-  // Observador para remover o selo Netlify se ele for injetado depois (brute-force)
+  // Observador para remover o selo Netlify se ele for injetado depois (brute-force).
+  // O selo atual é um iframe com id "nl-badge-frame" (não contém "netlify" no nome).
   const removerNetlify = () => {
-    const selos = document.querySelectorAll('#netlify-drawer, .netlify-drawer, [data-netlify-identity-menu], .netlify-badge, .netlify-badge-wrapper, [id*="netlify"], [class*="netlify"], iframe[src*="netlify"], div[class*="netlify"]');
+    const selos = document.querySelectorAll('#nl-badge-frame, iframe[id^="nl-"], iframe[title*="Netlify"], #netlify-drawer, .netlify-drawer, [data-netlify-identity-menu], .netlify-badge, .netlify-badge-wrapper, [id*="netlify"], [class*="netlify"], iframe[src*="netlify"], div[class*="netlify"]');
     selos.forEach(s => {
       try {
         s.style.setProperty("display", "none", "important");
