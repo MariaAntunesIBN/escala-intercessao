@@ -80,9 +80,9 @@ function slotCelula(i){
     chips.innerHTML="";
     sel[i].forEach((nome,j)=>{const c=document.createElement("span");c.className="chip";c.textContent=nome;
       const x=document.createElement("button");x.type="button";x.textContent="×";x.title="Remover";
-      x.onclick=()=>{sel[i].splice(j,1);refresh()};c.append(x);chips.append(c)});
-    // O <select> é recriado a cada mudança: assim os já escolhidos aparecem marcados
-    // já na primeira vez que a lista é aberta.
+      x.onclick=()=>{sel[i].splice(j,1);renderEscala()};c.append(x);chips.append(c)});
+    // O <select> é recriado a cada mudança (renderEscala) em TODAS as células:
+    // assim os marcadores já aparecem certos na primeira vez que a lista é aberta.
     const se=document.createElement("select");se.className="addsel";
     const o0=document.createElement("option");o0.value="";o0.textContent="+ adicionar servo";se.append(o0);
     // Todos os servos continuam disponíveis na lista; os já escolhidos apenas aparecem marcados.
@@ -91,7 +91,7 @@ function slotCelula(i){
       o.textContent=n+(aqui?"  ✓ neste horário":fora.has(n)?"  • já escalado":"");
       o.className=aqui?"ja-aqui":fora.has(n)?"ja-fora":"";
       se.append(o)});
-    se.onchange=()=>{const v=se.value;if(!v)return;sel[i].push(v);refresh()};
+    se.onchange=()=>{const v=se.value;if(!v)return;sel[i].push(v);renderEscala()};
     holder.replaceChildren(se)};
   box.append(chips,holder);td.append(box);refresh();return td}
 function renderEscala(){const m=+$("mes").value,y=+$("ano").value,tb=$("tb");tb.innerHTML="";
