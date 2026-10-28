@@ -9,7 +9,10 @@
 <meta name="apple-mobile-web-app-title" content="Escala">
 <meta name="robots" content="noindex"><title>Administração – Escala</title>
 <script src="/vendor/jspdf.umd.min.js"></script>
-<style>#login{max-width:340px;margin:12vh auto}</style><link rel="stylesheet" href="/mobile.css"></head>
+<style>#login{max-width:340px;margin:12vh auto}
+.addsel option.ja-aqui{color:#0a6b81;font-weight:700}
+.addsel option.ja-fora{color:#9a7b00}
+.addsel option.ja-aqui,.addsel option.ja-fora{background:#f1f7f9}</style><link rel="stylesheet" href="/mobile.css"></head>
 <body>
 <header class="top"><div class="in"><a class="logo" href="/"><img id="lg" alt="Igreja Batista Nacional de Sorriso"></a><div class="sep"></div><div><h1>Ministério de Intercessão</h1><p>Administração</p></div></div></header>
 <div class="w">
@@ -24,7 +27,7 @@
 
   <div id="p1"><div class="card"><div class="row"><label>Mês<select id="mes"></select></label><label>Ano<input id="ano" type="number" min="2020" max="2100"></label>
   <button class="s" id="rod">Preencher em rodízio</button><button class="s" id="lim">Limpar</button></div></div>
-  <div class="card"><div class="msg" style="margin:0 0 8px">Pode escolher mais de um servo no mesmo horário. Se não for casal, os nomes aparecem separados por “/”. <b id="nservos"></b></div>
+  <div class="card"><div class="msg" style="margin:0 0 8px">Pode escolher mais de um servo no mesmo horário. Se não for casal, os nomes aparecem separados por “/”. Na lista, <b>✓ neste horário</b> e <b>• já escalado</b> indicam quem já foi escolhido, mas nada impede escolher de novo. <b id="nservos"></b></div>
   <div class="tw"><table><thead><tr><th>Dia</th><th>Data</th><th>Início</th><th>Término</th><th>Servos</th></tr></thead><tbody id="tb"></tbody></table></div>
   <div class="row" style="margin-top:12px"><button id="pub">Salvar e publicar</button><button class="s" id="pdf">Baixar PDF</button><button class="d" id="del">Excluir escala do mês</button></div>
   <div class="msg" id="emsg"></div></div></div>
@@ -79,7 +82,12 @@ function slotCelula(i){
       const x=document.createElement("button");x.type="button";x.textContent="×";x.title="Remover";
       x.onclick=()=>{sel[i].splice(j,1);refresh()};c.append(x);chips.append(c)});
     se.innerHTML="";const o0=document.createElement("option");o0.value="";o0.textContent="+ adicionar servo";se.append(o0);
-    servosAtivos().filter(n=>!sel[i].includes(n)).forEach(n=>{const o=document.createElement("option");o.value=n;o.textContent=n;se.append(o)});
+    // Todos os servos continuam disponíveis na lista; os já escolhidos apenas aparecem marcados.
+    const fora=new Set();sel.forEach((l,k)=>{if(k!==i)l.forEach(n=>fora.add(n))});
+    servosAtivos().forEach(n=>{const aqui=sel[i].includes(n),o=document.createElement("option");o.value=n;
+      o.textContent=n+(aqui?"  ✓ neste horário":fora.has(n)?"  • já escalado":"");
+      o.className=aqui?"ja-aqui":fora.has(n)?"ja-fora":"";
+      se.append(o)});
     se.value=""};
   se.onchange=()=>{const v=se.value;if(!v)return;sel[i].push(v);refresh()};
   box.append(chips,se);td.append(box);refresh();return td}
