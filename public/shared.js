@@ -37,12 +37,23 @@ function initFooter() {
   document.body.append(b);
   b.querySelector("#fvoltar").onclick = () => { if (history.length > 1) history.back(); else location.href = "/"; };
   
-  // Observador para remover o selo Netlify se ele for injetado depois
+  // Observador para remover o selo Netlify se ele for injetado depois (brute-force)
   const removerNetlify = () => {
-    const selos = document.querySelectorAll('#netlify-drawer, .netlify-drawer, [data-netlify-identity-menu], .netlify-badge, .netlify-badge-wrapper, [id*="netlify"], [class*="netlify"], iframe[src*="netlify"]');
-    selos.forEach(s => s.remove());
+    const selos = document.querySelectorAll('#netlify-drawer, .netlify-drawer, [data-netlify-identity-menu], .netlify-badge, .netlify-badge-wrapper, [id*="netlify"], [class*="netlify"], iframe[src*="netlify"], div[class*="netlify"]');
+    selos.forEach(s => {
+      try {
+        s.style.setProperty("display", "none", "important");
+        s.style.setProperty("visibility", "hidden", "important");
+        s.style.setProperty("opacity", "0", "important");
+        s.style.setProperty("pointer-events", "none", "important");
+        s.style.setProperty("position", "fixed", "important");
+        s.style.setProperty("left", "-9999px", "important");
+        s.remove();
+      } catch (e) {}
+    });
   };
   removerNetlify();
+  setInterval(removerNetlify, 1000); // Tenta remover a cada segundo também
   const obs = new MutationObserver(removerNetlify);
   obs.observe(document.body, { childList: true, subtree: true });
 }

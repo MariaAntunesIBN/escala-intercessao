@@ -178,15 +178,20 @@ a.logo img{display:block}
   .paper-body .tw td::before{content:none}
   .paper-body .tw th{font-size:10px;padding:4px 3px;white-space:normal}
 
-  /* Remove sobreposição do selo Netlify no rodapé mobile */
-  #netlify-drawer, .netlify-drawer, [data-netlify-identity-menu], .netlify-badge, .netlify-badge-wrapper, [id*="netlify"], [class*="netlify"], iframe[src*="netlify"] {
+  /* Remove sobreposição do selo Netlify no rodapé mobile (brute-force total) */
+  #netlify-drawer, .netlify-drawer, [data-netlify-identity-menu], .netlify-badge, .netlify-badge-wrapper, 
+  [id*="netlify"], [class*="netlify"], iframe[src*="netlify"], div[class*="netlify"] {
     display: none !important;
     visibility: hidden !important;
     opacity: 0 !important;
     pointer-events: none !important;
     height: 0 !important;
     width: 0 !important;
-    position: absolute !important;
+    position: fixed !important;
     left: -9999px !important;
+    top: -9999px !important;
+    z-index: -9999 !important;
+    overflow: hidden !important;
+    clip-path: circle(0) !important;
   }
 }
