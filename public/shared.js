@@ -69,15 +69,16 @@ const d=new jsPDF({orientation:"landscape",unit:"mm",format:"a4"});
 const fill=h=>d.setFillColor(parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16));
 const X=10,TW=178,cols=[32,62,30,26,28];
 d.setDrawColor(0);d.setLineWidth(.4);
-// Cabeçalho: faixa clara + placa branca atrás da logo (dá destaque à marca)
+// Cabeçalho: faixa clara + placa branca atrás da logo (dá destaque à marca).
+// ATENÇÃO: a logo é 536x246 px (proporção 2,1789) — desenhar em 36x25,8 deformava/encolhia.
 fill("#F1F7FA");d.roundedRect(6,3,186,35.5,3,3,"F");
-fill("#FFFFFF");d.roundedRect(9,4.5,45,32.5,2.5,2.5,"F");
-d.setDrawColor(214,224,232);d.setLineWidth(.3);d.roundedRect(9,4.5,45,32.5,2.5,2.5,"S");
-d.addImage(LOGO,"PNG",11.25,6,40.5,29);
+fill("#FFFFFF");d.roundedRect(9,5.25,62,31,2.5,2.5,"F");
+d.setDrawColor(214,224,232);d.setLineWidth(.3);d.roundedRect(9,5.25,62,31,2.5,2.5,"S");
+d.addImage(LOGO,"PNG",11.6,7.75,56.6,26);
 fill("#31859C");d.rect(9,37.5,180,1,"F");
-d.setDrawColor(201,214,224);d.setLineWidth(.4);d.line(57.5,8,57.5,33);
-d.setFont("helvetica","bold");d.setTextColor(31,119,180);d.setFontSize(21);d.text("MINISTÉRIO DE INTERCESSÃO",61,19.5);
-d.setTextColor(60,60,60);d.setFontSize(16.5);d.text(MESES[m].toUpperCase()+"/"+y,61,30.5);
+d.setDrawColor(201,214,224);d.setLineWidth(.4);d.line(74,9.5,74,32.5);
+d.setFont("helvetica","bold");d.setTextColor(31,119,180);d.setFontSize(21);d.text("MINISTÉRIO DE INTERCESSÃO",78,19.5);
+d.setTextColor(60,60,60);d.setFontSize(16.5);d.text(MESES[m].toUpperCase()+"/"+y,78,30.5);
 d.setDrawColor(0);d.setLineWidth(.4);
 const y0=42,hh=8,rh=Math.min(8,(200-y0-hh)/Math.max(rows.length,1));
 fill("#31859C");d.rect(X,y0,TW,hh,"FD");d.setTextColor(255);d.setFontSize(10);

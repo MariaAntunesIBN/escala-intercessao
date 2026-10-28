@@ -1,4 +1,4 @@
-const CACHE = "escala-v22";
+const CACHE = "escala-v23";
 const SHELL = [
   "/", "/index.html", "/admin.html", "/versiculos.js", "/shared.js", "/mobile.css",
   "/vendor/jspdf.umd.min.js",
