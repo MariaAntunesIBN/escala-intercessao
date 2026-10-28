@@ -35,7 +35,7 @@
 
   <div id="p1">
     <div class="card"><div class="row"><label>Mês<select id="mes"></select></label><label>Ano<select id="ano"></select></label>
-    <button id="pdf" hidden>Baixar PDF</button></div></div>
+    <button id="pdf" hidden>Baixar PDF</button><button class="zap" id="zap" hidden>Compartilhar no WhatsApp</button></div></div>
     <div class="card paper">
       <div class="paper-head"><img id="plg" alt="Igreja Batista Nacional de Sorriso">
         <div><h2>MINISTÉRIO DE INTERCESSÃO</h2><p id="ptitulo"></p></div></div>
@@ -95,12 +95,12 @@ async function iniciar(){
   const anos=[...new Set([...chaves.map(k=>k.slice(0,4)),String(n.getFullYear()),String(dy)])].sort();
   $("ano").innerHTML=anos.map(a=>`<option value="${a}">${a}</option>`).join("");
   $("ano").value=dy;$("mes").value=dm-1;carregar()}
-async function carregar(){const y=+$("ano").value,m=+$("mes").value;$("tb").innerHTML="";$("pdf").hidden=true;
+async function carregar(){const y=+$("ano").value,m=+$("mes").value;$("tb").innerHTML="";$("pdf").hidden=true;$("zap").hidden=true;
 $("ptitulo").textContent=MESES[m].toUpperCase()+"/"+y;renderCal(m,y);$("msg").textContent="Carregando...";
 if(!y){$("msg").textContent="";return}
 try{const r=await fetch(`/api/escala/${y}-${pad(m+1)}`);rows=await r.json()||[];
 if(!rows.length){$("msg").textContent="A escala deste mês ainda não foi publicada.";return}
-$("msg").textContent="";$("pdf").hidden=false;
+$("msg").textContent="";$("pdf").hidden=false;$("zap").hidden=false;
 rows.forEach(s=>{const tr=document.createElement("tr");if(s.w===0)tr.className="dom";
 if(y===n.getFullYear()&&m===n.getMonth()&&s.d===n.getDate())tr.classList.add("hoje");
 const lbs=["Dia","Servos","Data","Início","Término"];[DIAS[s.w],nomeSlot(s)||"—",`${pad(s.d)}/${pad(m+1)}/${y}`,s.i,s.f].forEach((t,i)=>{const td=document.createElement("td");td.textContent=t;td.dataset.l=lbs[i];tr.append(td)});$("tb").append(tr)})}
@@ -119,6 +119,7 @@ h+=`<td${cls?' class="'+cls+'"':""}>${d}</td>`}
 h+="</tr>"}
 h+="</tbody></table>";$("cal").innerHTML=h}
 $("mes").onchange=carregar;$("ano").onchange=carregar;$("pdf").onclick=()=>gerarPdf(+$("ano").value,+$("mes").value,rows);
+$("zap").onclick=()=>compartilharEscala(+$("ano").value,+$("mes").value,rows);
 iniciar();renderVersiculo();if(typeof initFooter==="function")initFooter();
 
 // ---- Lógica da Bíblia

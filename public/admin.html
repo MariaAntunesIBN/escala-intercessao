@@ -104,20 +104,7 @@ $("lim").onclick=()=>{sel=slots.map(()=>[]);renderEscala()};
 $("rod").onclick=()=>{const o=servosAtivos();if(!o.length){$("emsg").textContent="Cadastre ao menos um servo ativo.";return}sel=slots.map((_,i)=>[o[i%o.length]]);renderEscala()};
 const linhas=()=>slots.map((s,i)=>({...s,nomes:sel[i].slice(),nome:sel[i].join(" / ")}));
 $("pdf").onclick=()=>gerarPdf(+$("ano").value,+$("mes").value,linhas());
-$("zap").onclick=async()=>{
-  const y=+$("ano").value,m=+$("mes").value,texto=`Escala de Intercessão – ${MESES[m]}/${y}`;
-  const {blob,nome}=pdfArquivo(y,m,linhas());
-  const file=new File([blob],nome,{type:"application/pdf"});
-  if(navigator.canShare&&navigator.canShare({files:[file]})){
-    try{await navigator.share({files:[file],title:texto,text:texto});return}
-    catch(e){if(e&&e.name==="AbortError")return}
-  }
-  // Sem compartilhamento de arquivo: baixa o PDF e abre o WhatsApp com o texto.
-  const url=URL.createObjectURL(blob),a=document.createElement("a");
-  a.href=url;a.download=nome;document.body.append(a);a.click();a.remove();
-  setTimeout(()=>URL.revokeObjectURL(url),4000);
-  window.open("https://wa.me/?text="+encodeURIComponent(texto),"","noopener");
-};
+$("zap").onclick=()=>compartilharEscala(+$("ano").value,+$("mes").value,linhas());
 $("pub").onclick=async()=>{try{await api("/api/escala/"+ym(),"PUT",{linhas:linhas()});$("emsg").textContent="Escala publicada na página pública."}catch(e){$("emsg").textContent=e.message}};
 $("del").onclick=async()=>{if(!confirm("Remover a escala publicada deste mês?"))return;try{await api("/api/escala/"+ym(),"DELETE");sel=slots.map(()=>[]);renderEscala();$("emsg").textContent="Escala removida."}catch(e){$("emsg").textContent=e.message}};
 

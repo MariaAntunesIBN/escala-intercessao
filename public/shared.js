@@ -81,6 +81,21 @@ if(c===0)d.setTextColor(229,57,53);else d.setTextColor(40);d.text(String(k+1),cl
 return d}
 function nomeArquivoPdf(y,m){return `Escala_Intercessao_${MESES[m]}_${y}.pdf`}
 function pdfArquivo(y,m,rows){const d=gerarPdfDoc(y,m,rows);return {blob:d.output("blob"),nome:nomeArquivoPdf(y,m)}}
+// Compartilha a escala em PDF: usa o compartilhamento nativo (anexa o arquivo)
+// e, se não houver, baixa o PDF e abre o WhatsApp com o texto.
+async function compartilharEscala(y,m,rows){
+  const texto=`Escala de Intercessão – ${MESES[m]}/${y}`;
+  const {blob,nome}=pdfArquivo(y,m,rows);
+  const file=new File([blob],nome,{type:"application/pdf"});
+  if(navigator.canShare&&navigator.canShare({files:[file]})){
+    try{await navigator.share({files:[file],title:texto,text:texto});return}
+    catch(e){if(e&&e.name==="AbortError")return}
+  }
+  const url=URL.createObjectURL(blob),a=document.createElement("a");
+  a.href=url;a.download=nome;document.body.append(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),4000);
+  window.open("https://wa.me/?text="+encodeURIComponent(texto),"","noopener");
+}
 function gerarPdf(y,m,rows){const d=gerarPdfDoc(y,m,rows);const arquivo=nomeArquivoPdf(y,m);
 try{d.save(arquivo)}
 catch(e){
