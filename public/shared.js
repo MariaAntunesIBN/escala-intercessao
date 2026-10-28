@@ -52,7 +52,7 @@ for(let d=1;d<=nd;d++){const w=new Date(y,m,d).getDay();
 if(w===4)s.push({d,w,i:"19:00",f:"20:00"});
 if(w===0)[["08:30","09:30"],["16:30","17:30"],["18:45","19:45"]].forEach(h=>s.push({d,w,i:h[0],f:h[1]}))}
 return s}
-function gerarPdf(y,m,rows){const {jsPDF}=window.jspdf;
+function gerarPdfDoc(y,m,rows){const {jsPDF}=window.jspdf;
 const d=new jsPDF({orientation:"landscape",unit:"mm",format:"a4"});
 const fill=h=>d.setFillColor(parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16));
 const X=10,TW=178,cols=[32,62,30,26,28];
@@ -78,7 +78,10 @@ fill("#3C3C3C");d.rect(cl,y0-13,cw,10,"F");d.setFontSize(13);
 const first=new Date(y,m,1).getDay(),nd=new Date(y,m+1,0).getDate();
 d.setFontSize(15);for(let k=0;k<nd;k++){const p=first+k,r=Math.floor(p/7),c=p%7;
 if(c===0)d.setTextColor(229,57,53);else d.setTextColor(40);d.text(String(k+1),cl+c*cell+cell/2,y0-3+r*13+9,{align:"center"})}
-const arquivo=`Escala_Intercessao_${MESES[m]}_${y}.pdf`;
+return d}
+function nomeArquivoPdf(y,m){return `Escala_Intercessao_${MESES[m]}_${y}.pdf`}
+function pdfArquivo(y,m,rows){const d=gerarPdfDoc(y,m,rows);return {blob:d.output("blob"),nome:nomeArquivoPdf(y,m)}}
+function gerarPdf(y,m,rows){const d=gerarPdfDoc(y,m,rows);const arquivo=nomeArquivoPdf(y,m);
 try{d.save(arquivo)}
 catch(e){
   // Alguns navegadores móveis bloqueiam o download direto: abre o PDF em nova aba.

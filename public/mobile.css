@@ -30,6 +30,12 @@ input,select,button{font:inherit;padding:8px 10px;border:1px solid var(--bd);bor
 button{cursor:pointer;background:var(--pr);color:#fff;border-color:var(--pr)}
 button.s{background:var(--card);color:var(--tx);border-color:var(--bd)}
 button.d{background:var(--card);color:var(--rd);border-color:var(--rd)}
+button.zap{background:#25d366;color:#fff;border-color:#25d366}
+/* Hover/pressionado: fundo escurece e as letras ficam brancas */
+button:hover,button:focus-visible,button:active{color:#fff;filter:brightness(.9)}
+button.d:hover,button.d:focus-visible,button.d:active{background:var(--rd);border-color:var(--rd);color:#fff}
+button.zap:hover,button.zap:focus-visible,button.zap:active{background:#1da851;border-color:#1da851;color:#fff}
+button.s:hover,button.s:focus-visible,button.s:active{color:var(--tx)}
 .tw{overflow-x:auto}
 table{border-collapse:collapse;width:100%}
 th,td{padding:8px;border-bottom:1px solid var(--bd);text-align:left;white-space:nowrap}
