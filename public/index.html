@@ -18,9 +18,9 @@
 .cgrid button{background:var(--card);color:var(--tx);border:1px solid var(--bd);padding:10px 0;font-weight:700}
 .cgrid button.on{background:var(--pr);color:#fff;border-color:var(--pr)}
 .vlist p{margin:12px 0;padding-left:35px;position:relative}
-.vlist p b{position:absolute;left:0;color:var(--pr);font-size:14px;width:30px;text-align:right}
+.vlist p b{position:absolute;left:0;color:var(--txa);font-size:14px;width:30px;text-align:right}
 .b-nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--bd)}
-.b-nav h2{margin:0;color:var(--pr)}
+.b-nav h2{margin:0;color:var(--txa)}
 .cat-0{background:#5d4037 !important} .cat-1{background:#f57c00 !important}
 .cat-2{background:#d32f2f !important} .cat-3{background:#7b1fa2 !important}
 .cat-4{background:#c2185b !important} .cat-5{background:#1976d2 !important}
@@ -101,8 +101,10 @@ if(!y){$("msg").textContent="";return}
 try{const r=await fetch(`/api/escala/${y}-${pad(m+1)}`);rows=await r.json()||[];
 if(!rows.length){$("msg").textContent="A escala deste mês ainda não foi publicada.";return}
 $("msg").textContent="";$("pdf").hidden=false;$("zap").hidden=false;
+const hj=new Date(n.getFullYear(),n.getMonth(),n.getDate());
 rows.forEach(s=>{const tr=document.createElement("tr");if(s.w===0)tr.className="dom";
-if(y===n.getFullYear()&&m===n.getMonth()&&s.d===n.getDate())tr.classList.add("hoje");
+const dt=new Date(y,m,s.d);
+if(dt<hj)tr.classList.add("passado");else if(dt>hj)tr.classList.add("futuro");else tr.classList.add("hoje");
 const lbs=["Dia","Servos","Data","Início","Término"];[DIAS[s.w],nomeSlot(s)||"—",`${pad(s.d)}/${pad(m+1)}/${y}`,s.i,s.f].forEach((t,i)=>{const td=document.createElement("td");td.textContent=t;td.dataset.l=lbs[i];tr.append(td)});$("tb").append(tr)})}
 catch(e){$("msg").textContent="Não foi possível carregar a escala."}}
 function renderCal(m,y){const first=new Date(y,m,1).getDay(),nd=new Date(y,m+1,0).getDate();
@@ -114,7 +116,7 @@ const linhas=Math.ceil((first+nd)/7);
 for(let r=0;r<linhas;r++){h+="<tr>";
 for(let k=0;k<7;k++){const d=r*7+k-first+1;
 if(d<1||d>nd){h+='<td class="off"></td>';continue}
-const cls=[k===0?"sun":"",d===hj?"hoje":""].filter(Boolean).join(" ");
+const cls=[k===0?"sun":"",d===hj?"hoje":(d<hj?"passado":"")].filter(Boolean).join(" ");
 h+=`<td${cls?' class="'+cls+'"':""}>${d}</td>`}
 h+="</tr>"}
 h+="</tbody></table>";$("cal").innerHTML=h}

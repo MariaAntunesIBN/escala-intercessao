@@ -83,8 +83,10 @@ d.setDrawColor(0);d.setLineWidth(.4);
 const y0=42,hh=8,rh=Math.min(8,(200-y0-hh)/Math.max(rows.length,1));
 fill("#31859C");d.rect(X,y0,TW,hh,"FD");d.setTextColor(255);d.setFontSize(10);
 let cx=X;["","SERVOS","DATA","INÍCIO","TÉRMINO"].forEach((t,i)=>{if(t)d.text(t,cx+cols[i]/2,y0+5.4,{align:"center"});cx+=cols[i]});
+const hj=new Date();hj.setHours(0,0,0,0);
 rows.forEach((s,i)=>{const yy=y0+hh+i*rh;if(s.w===0){fill("#C5D9F1");d.rect(X,yy,TW,rh,"F")}
-d.setTextColor(0);d.setFontSize(Math.min(10,rh+2));d.setFont("helvetica","bold");let x=X;
+// Datas que já passaram saem em cinza, para diferenciar das que ainda vão acontecer.
+d.setTextColor(new Date(y,m,s.d)<hj?150:0);d.setFontSize(Math.min(10,rh+2));d.setFont("helvetica","bold");let x=X;
 [DIAS[s.w],nomeSlot(s)||"-",pad(s.d)+"/"+pad(m+1)+"/"+y,s.i,s.f].forEach((t,j)=>{
 if(j===0)d.text(t,x+1.5,yy+rh*.68);else d.text(t,x+cols[j]/2,yy+rh*.68,{align:"center"});x+=cols[j]});
 d.setLineWidth(.2);d.line(X,yy+rh,X+TW,yy+rh)});
