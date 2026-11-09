@@ -138,3 +138,18 @@ if("serviceWorker" in navigator){
     document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")atualizar()});
   }).catch(()=>{});
 }
+
+(()=>{
+  const seletor=document.getElementById("themeChoice");
+  if(!seletor)return;
+  let tema="auto";
+  try{tema=localStorage.getItem("escala-tema")||"auto"}catch(e){}
+  if(!["auto","light","dark"].includes(tema))tema="auto";
+  seletor.value=tema;
+  seletor.addEventListener("change",()=>{
+    const valor=seletor.value;
+    try{if(valor==="auto")localStorage.removeItem("escala-tema");else localStorage.setItem("escala-tema",valor)}catch(e){}
+    if(valor==="auto")document.documentElement.removeAttribute("data-theme");
+    else document.documentElement.dataset.theme=valor;
+  });
+})();

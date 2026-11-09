@@ -1,6 +1,8 @@
 /* ===== Base compartilhada (index.html + admin.html) ===== */
-:root{color-scheme:light dark;--bg:#f4f6f8;--card:#fff;--tx:#1b2430;--mu:#5d6b7a;--bd:#d6dde5;--pr:#31859c;--txa:#2f6f85;--rd:#d32f2f;--sun:#e8f0fa}
-@media (prefers-color-scheme:dark){:root{--bg:#12171d;--card:#1b232c;--tx:#e8edf2;--mu:#9aa8b6;--bd:#2f3b47;--sun:#223246;--txa:#6fd0e8}}
+:root{color-scheme:light dark;--bg:#f4f6f8;--card:#fff;--tx:#1b2430;--mu:#5d6b7a;--bd:#d6dde5;--pr:#31859c;--txa:#2f6f85;--rd:#d32f2f;--sun:#e8f0fa;--stripe:rgba(0,0,0,.03);--cal-head:rgba(0,0,0,.05);--cal-off:rgba(0,0,0,.02);--paper-top:#f7fbfd;--paper-bottom:#e6f0f7}
+@media (prefers-color-scheme:dark){:root{--bg:#12171d;--card:#1b232c;--tx:#e8edf2;--mu:#9aa8b6;--bd:#2f3b47;--sun:#223246;--txa:#6fd0e8;--rd:#ff8a80;--stripe:rgba(255,255,255,.045);--cal-head:rgba(255,255,255,.07);--cal-off:rgba(255,255,255,.03);--paper-top:#27333d;--paper-bottom:#1b232c}}
+:root[data-theme="light"]{color-scheme:light;--bg:#f4f6f8;--card:#fff;--tx:#1b2430;--mu:#5d6b7a;--bd:#d6dde5;--txa:#2f6f85;--rd:#d32f2f;--sun:#e8f0fa;--stripe:rgba(0,0,0,.03);--cal-head:rgba(0,0,0,.05);--cal-off:rgba(0,0,0,.02);--paper-top:#f7fbfd;--paper-bottom:#e6f0f7}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#12171d;--card:#1b232c;--tx:#e8edf2;--mu:#9aa8b6;--bd:#2f3b47;--txa:#6fd0e8;--rd:#ff8a80;--sun:#223246;--stripe:rgba(255,255,255,.045);--cal-head:rgba(255,255,255,.07);--cal-off:rgba(255,255,255,.03);--paper-top:#27333d;--paper-bottom:#1b232c}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.4 system-ui,sans-serif}
 .w{max-width:1200px;margin:0 auto;padding:16px}
@@ -26,6 +28,7 @@ h2{font-size:16px;margin:0 0 10px}
 .card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px;margin-bottom:14px}
 .row{display:flex;flex-wrap:wrap;gap:10px;align-items:end}
 label{display:flex;flex-direction:column;font-size:12px;color:var(--mu);gap:3px;flex:1;min-width:150px}
+.theme-control{flex:0 1 150px;min-width:120px}
 input,select,button{font:inherit;padding:8px 10px;border:1px solid var(--bd);border-radius:8px;background:var(--card);color:var(--tx)}
 button{cursor:pointer;background:var(--pr);color:#fff;border-color:var(--pr)}
 button.s{background:var(--card);color:var(--tx);border-color:var(--bd)}
@@ -36,12 +39,15 @@ button:hover,button:focus-visible,button:active{color:#fff;filter:brightness(.9)
 button.d:hover,button.d:focus-visible,button.d:active{background:var(--rd);border-color:var(--rd);color:#fff}
 button.zap:hover,button.zap:focus-visible,button.zap:active{background:#1da851;border-color:#1da851;color:#fff}
 button.s:hover,button.s:focus-visible,button.s:active{color:var(--tx)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--pr);outline-offset:2px}
 .tw{overflow-x:auto}
 table{border-collapse:collapse;width:100%}
 th,td{padding:8px;border-bottom:1px solid var(--bd);text-align:left;white-space:nowrap}
 th{background:var(--pr);color:#fff;font-size:13px}
 tr.dom td{background:var(--sun)}
 tr.hoje td{font-weight:700;outline:2px solid var(--pr);outline-offset:-2px}
+tr.passado td{color:var(--mu);opacity:.7}
+tr.futuro td:first-child{box-shadow:inset 3px 0 0 var(--pr)}
 tr.off td:not(:last-child){opacity:.5}
 td select{width:100%;min-width:170px}
 .act{display:flex;gap:6px}
@@ -82,6 +88,8 @@ a{color:var(--txa)}
   label{min-width:100%;flex:1 1 100%}
   .row{gap:8px}
   button,input,select{padding:10px 12px;font-size:16px}
+  button,input,select{min-height:44px}
+  .theme-control{min-width:100%;flex:1 1 100%}
   .act{flex-wrap:wrap}
   .act button{padding:8px 10px;font-size:14px}
   .tabs { flex-wrap: wrap; }
@@ -126,7 +134,7 @@ a.logo img{display:block}
 
 /* ===== Visão "igual ao PDF" (home somente leitura) ===== */
 .paper{background:var(--card);color:var(--tx);padding:0;overflow:hidden}
-.paper-head{display:flex;align-items:center;gap:16px;padding:14px 16px;background:linear-gradient(180deg,#f7fbfd,#e6f0f7);border-bottom:3px solid var(--pr)}
+.paper-head{display:flex;align-items:center;gap:16px;padding:14px 16px;background:linear-gradient(180deg,var(--paper-top),var(--paper-bottom));border-bottom:3px solid var(--pr)}
 .paper-head img{height:58px;width:auto;display:block;background:#fff;border:1px solid var(--bd);border-radius:10px;padding:4px 6px}
 .paper-head h2{margin:0;font-size:19px;letter-spacing:.02em;color:var(--tx)}
 .paper-head p{margin:4px 0 0;font-size:13px;color:var(--mu);letter-spacing:.1em}
@@ -136,22 +144,34 @@ a.logo img{display:block}
 .paper-body table{width:100%;border-collapse:collapse;color:var(--tx)}
 .paper-body th{background:var(--pr);color:#fff;border:1px solid var(--pr);font-size:13px;text-align:center;white-space:nowrap}
 .paper-body td{border:1px solid var(--bd);padding:6px 8px;text-align:center;white-space:nowrap;font-size:14px}
-.paper-body tr:nth-child(even) td{background:rgba(0,0,0,.03)}
+.paper-body tr:nth-child(even) td{background:var(--stripe)}
 .paper-body tr.dom td{background:var(--sun)}
 .paper-body tr.hoje td{font-weight:700;outline:2px solid var(--pr);outline-offset:-2px}
 /* Datas que já passaram: apagadas. Datas por vir: barra azul na primeira coluna. */
 .paper-body .tw tr.passado td{color:var(--mu);opacity:.7}
 .paper-body .tw tr.futuro td:first-child{box-shadow:inset 3px 0 0 var(--pr)}
 
+/* Colunas proporcionais ao texto: só a coluna "Servos" absorve o espaço que sobra.
+   Página pública: Dia | Servos | Data | Início | Término (Servos = 2ª coluna).
+   No celular, as larguras são substituídas por percentuais para mostrar tudo na tela. */
+.paper-body .tw th:not(:nth-child(2)),.paper-body .tw td:not(:nth-child(2)){width:1%}
+@media (min-width:641px){
+  /* Admin: Dia | Data | Início | Término | Servos (Servos = 5ª).
+     O seletor exige #app (só existe no admin) porque o index público também usa #p1.
+     No celular o Admin usa cartões, por isso a regra vale apenas no desktop. */
+  #app #p1 .tw th:not(:nth-child(5)),#app #p1 .tw td:not(:nth-child(5)){width:1%}
+}
+
 /* ===== Calendário (dentro do papel) ===== */
 .cal{margin-top:18px;max-width:420px}
 .cal-top{background:var(--pr);color:#fff;font-weight:700;text-align:center;padding:8px;border-radius:8px 8px 0 0;letter-spacing:.06em}
 .cal table{width:100%;border-collapse:collapse;background:var(--card)}
-.cal th{background:rgba(0,0,0,.05);color:var(--mu);border:1px solid var(--bd);padding:4px;font-size:12px;text-align:center;white-space:normal}
+.cal th{background:var(--cal-head);color:var(--mu);border:1px solid var(--bd);padding:4px;font-size:12px;text-align:center;white-space:normal}
 .cal th.sun{color:var(--rd)}
 .cal td{border:1px solid var(--bd);padding:6px 4px;text-align:center;white-space:normal;font-size:12px;color:var(--tx)}
-.cal td.off{background:rgba(0,0,0,.02)}
+.cal td.off{background:var(--cal-off)}
 .cal td.passado{color:var(--mu);opacity:.55}
+.cal td.futuro{box-shadow:inset 0 -2px 0 var(--pr)}
 .cal td.sun{background:var(--sun)}
 .cal td.hoje{background:var(--pr);color:#fff;font-weight:700}
 
@@ -179,18 +199,24 @@ a.logo img{display:block}
   .paper-head img{height:40px}
   .paper-head h2{font-size:15px}
   .paper-body{padding:10px 8px 12px}
-  /* Mantém a tabela da visão PDF como tabela real no celular */
-  .paper-body .tw{overflow-x:auto}
-  .paper-body .tw table{display:table;width:100%}
+  /* Exibe todas as colunas da escala sem rolagem horizontal. */
+  .paper-body .tw{overflow-x:visible}
+  .paper-body .tw table{display:table;table-layout:fixed;width:100%;min-width:0}
   .paper-body .tw thead{display:table-header-group}
   .paper-body .tw tbody{display:table-row-group}
   .paper-body .tw tr{display:table-row;border:0;padding:0;margin:0;background:transparent}
-  .paper-body .tw td{display:table-cell;text-align:center;white-space:nowrap;padding:4px 5px;font-size:11px;background:transparent}
-  .paper-body .tw tr:nth-child(even) td{background:#f6f9fb}
+  .paper-body .tw th:nth-child(1),.paper-body .tw td:nth-child(1){width:24%}
+  .paper-body .tw th:nth-child(2),.paper-body .tw td:nth-child(2){width:34%}
+  .paper-body .tw th:nth-child(3),.paper-body .tw td:nth-child(3){width:18%}
+  .paper-body .tw th:nth-child(4),.paper-body .tw td:nth-child(4){width:12%}
+  .paper-body .tw th:nth-child(5),.paper-body .tw td:nth-child(5){width:12%}
+  .paper-body .tw td{display:table-cell;text-align:center;white-space:normal;overflow-wrap:anywhere;padding:4px 3px;font-size:10px;line-height:1.25;background:transparent}
+  .paper-body .tw td:nth-child(4),.paper-body .tw td:nth-child(5){white-space:nowrap}
+  .paper-body .tw tr:nth-child(even) td{background:var(--stripe)}
   .paper-body .tw tr.dom td{background:var(--sun)}
   .paper-body .tw tr.hoje td{outline:2px solid var(--pr);outline-offset:-2px;font-weight:700}
   .paper-body .tw td::before{content:none}
-  .paper-body .tw th{font-size:10px;padding:4px 3px;white-space:normal}
+  .paper-body .tw th{font-size:10px;padding:4px 2px;white-space:normal}
 
   /* Remove sobreposição do selo Netlify no rodapé mobile (brute-force total) */
   #nl-badge-frame, iframe[id^="nl-"], iframe[title*="Netlify"],
@@ -211,19 +237,15 @@ a.logo img{display:block}
   }
 }
 
-/* ===== Modo escuro: letras sempre legíveis =====
-   (estes overrides ficam no fim do arquivo para vencer as regras de mobile) */
-@media (prefers-color-scheme:dark){
-  /* O papel tinha gradiente claro fixo: o texto claro sumia nele */
-  .paper-head{background:linear-gradient(180deg,#27333d,#1b232c)}
-  /* Zebra/calendário sem fundos claros fixos */
-  .paper-body tr:nth-child(even) td,
-  .paper-body .tw tr:nth-child(even) td{background:rgba(255,255,255,.045)}
-  .paper-body .tw tr.dom td{background:var(--sun)}
-  .cal th{background:rgba(255,255,255,.07);color:var(--tx)}
-  .cal td.off{background:rgba(255,255,255,.03)}
-  .cal td.sun{background:var(--sun)}
-  /* Vermelhos mais claros para leitura em fundo escuro */
-  .err{color:#ff8a80}
-  button.d{color:#ff8a80;border-color:#e0574f}
+.scale-legend{display:flex;flex-wrap:wrap;gap:8px 16px;padding:10px 0 12px;color:var(--mu);font-size:13px}
+.scale-legend span{display:inline-flex;align-items:center;gap:7px}
+.scale-legend i{display:inline-block;width:11px;height:11px;border-radius:50%;border:2px solid transparent}
+.scale-legend .past-dot{background:var(--mu);opacity:.6}
+.scale-legend .today-dot{background:var(--pr)}
+.scale-legend .future-dot{background:transparent;border-color:var(--pr)}
+.mobile-table-hint{display:none}
+@media (max-width:640px){
+  .mobile-table-hint{display:block;margin:0 0 6px;color:var(--mu);font-size:12px}
 }
+:root[data-theme="dark"] .addsel option.ja-aqui{background:#223246;color:#6fd0e8}
+:root[data-theme="dark"] .addsel option.ja-fora{background:#223246;color:#ffda6a}

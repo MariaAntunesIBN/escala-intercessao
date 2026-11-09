@@ -14,7 +14,7 @@
 .addsel option{background:var(--card);color:var(--tx)}
 .addsel option.ja-aqui{color:#0a6b81;font-weight:700}
 .addsel option.ja-fora{color:#9a7b00}
-.addsel option.ja-aqui,.addsel option.ja-fora{background:#f1f7f9}</style><link rel="stylesheet" href="/mobile.css"></head>
+.addsel option.ja-aqui,.addsel option.ja-fora{background:#f1f7f9}</style><script>(()=>{try{const t=localStorage.getItem("escala-tema");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}})()</script><link rel="stylesheet" href="/mobile.css"></head>
 <body>
 <header class="top"><div class="in"><a class="logo" href="/"><img id="lg" alt="Igreja Batista Nacional de Sorriso"></a><div class="sep"></div><div><h1>Ministério de Intercessão</h1><p>Administração</p></div></div></header>
 <div class="w">
@@ -24,12 +24,13 @@
   <div class="row" style="margin-top:10px"><button id="entrar">Entrar</button><a href="/">Ver escala</a></div><div class="msg err" id="lmsg"></div></div>
 
   <div id="app" hidden>
-  <div class="row" style="justify-content:space-between;margin-bottom:12px"><h1>Administração</h1><span><a href="/">Ver página pública</a> <button class="s" id="sair">Sair</button></span></div>
+  <div class="row admin-titlebar" style="justify-content:space-between;margin-bottom:12px"><h1>Administração</h1><label class="theme-control">Tema<select id="themeChoice" aria-label="Tema da interface"><option value="auto">Automático</option><option value="light">Claro</option><option value="dark">Escuro</option></select></label><span><a href="/">Ver página pública</a> <button class="s" id="sair">Sair</button></span></div>
   <div class="tabs"><button id="t1" class="on">Escala</button><button id="t2">Servos</button></div>
 
   <div id="p1"><div class="card"><div class="row"><label>Mês<select id="mes"></select></label><label>Ano<input id="ano" type="number" min="2020" max="2100"></label>
   <button class="s" id="rod">Preencher em rodízio</button><button class="s" id="lim">Limpar</button></div></div>
   <div class="card"><div class="msg" style="margin:0 0 8px">Pode escolher mais de um servo no mesmo horário. Se não for casal, os nomes aparecem separados por “/”. Na lista, <b>✓ neste horário</b> e <b>• já escalado</b> indicam quem já foi escolhido, mas nada impede escolher de novo. <b id="nservos"></b></div>
+  <div class="scale-legend" aria-label="Legenda da escala"><span><i class="past-dot" aria-hidden="true"></i>Data passada</span><span><i class="today-dot" aria-hidden="true"></i>Hoje</span><span><i class="future-dot" aria-hidden="true"></i>Data futura</span></div>
   <div class="tw"><table><thead><tr><th>Dia</th><th>Data</th><th>Início</th><th>Término</th><th>Servos</th></tr></thead><tbody id="tb"></tbody></table></div>
   <div class="row" style="margin-top:12px"><button id="pub">Salvar e publicar</button><button class="s" id="pdf">Baixar PDF</button><button class="zap" id="zap">Enviar no WhatsApp</button><button class="d" id="del">Excluir escala do mês</button></div>
   <div class="msg" id="emsg"></div></div></div>
@@ -40,7 +41,8 @@
   <button id="salvar">Cadastrar</button><button class="s" id="cancel" hidden>Cancelar edição</button></div><div class="msg err" id="msg"></div></div>
   <div class="card"><div class="row" style="margin-bottom:10px"><label>Buscar<input id="q" placeholder="Nome ou telefone"></label>
   <label style="max-width:180px;flex:none">Mostrar<select id="f"><option value="ativos">Ativos</option><option value="inativos">Inativos</option><option value="todos">Todos</option></select></label></div>
-  <div class="tw"><table><thead><tr><th>Nome</th><th>Tipo</th><th>Celular</th><th>Status</th><th></th></tr></thead><tbody id="sb"></tbody></table></div><div class="msg" id="cnt"></div></div></div>
+  <div class="tw"><table><thead><tr><th>Nome</th><th>Tipo</th><th>Celular</th><th>Status</th><th></th></tr></thead><tbody id="sb"></tbody></table></div><div class="msg" id="cnt"></div></div>
+  <div class="card"><h2>Backup e restauração</h2><p class="msg">O arquivo inclui escalas e dados dos servos, inclusive telefones. Guarde-o em local protegido.</p><div class="row"><button class="s" id="backupDownload">Baixar backup</button><button class="s" id="backupPick">Restaurar backup</button><input id="backupFile" type="file" accept="application/json,.json" hidden></div><div class="msg" id="backupMsg" role="status" aria-live="polite"></div></div></div>
   </div>
 </div>
 
@@ -97,8 +99,10 @@ function slotCelula(i){
     holder.replaceChildren(se)};
   box.append(chips,holder);td.append(box);refresh();return td}
 function renderEscala(){const m=+$("mes").value,y=+$("ano").value,tb=$("tb");tb.innerHTML="";
+const hj=new Date();hj.setHours(0,0,0,0);
 $("nservos").textContent="("+servosAtivos().length+" servos disponíveis)";
 slots.forEach((s,i)=>{const tr=document.createElement("tr");if(s.w===0)tr.className="dom";
+const data=new Date(y,m,s.d);if(data<hj)tr.classList.add("passado");else if(data>hj)tr.classList.add("futuro");else tr.classList.add("hoje");
 const lbs=["Dia","Data","Início","Término"];[DIAS[s.w],`${pad(s.d)}/${pad(m+1)}/${y}`,s.i,s.f].forEach((t,j)=>{const td=document.createElement("td");td.textContent=t;td.dataset.l=lbs[j];tr.append(td)});
 tr.append(slotCelula(i));tb.append(tr)})}
 $("mes").onchange=carregarEscala;$("ano").onchange=carregarEscala;
@@ -109,6 +113,22 @@ $("pdf").onclick=()=>gerarPdf(+$("ano").value,+$("mes").value,linhas());
 $("zap").onclick=()=>compartilharEscala(+$("ano").value,+$("mes").value,linhas());
 $("pub").onclick=async()=>{try{await api("/api/escala/"+ym(),"PUT",{linhas:linhas()});$("emsg").textContent="Escala publicada na página pública."}catch(e){$("emsg").textContent=e.message}};
 $("del").onclick=async()=>{if(!confirm("Remover a escala publicada deste mês?"))return;try{await api("/api/escala/"+ym(),"DELETE");sel=slots.map(()=>[]);renderEscala();$("emsg").textContent="Escala removida."}catch(e){$("emsg").textContent=e.message}};
+
+$("backupDownload").onclick=async()=>{const out=$("backupMsg");out.textContent="Preparando backup...";
+try{const backup=await api("/api/backup");const blob=new Blob([JSON.stringify(backup,null,2)],{type:"application/json"});
+const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=`backup-escala-${new Date().toISOString().slice(0,10)}.json`;
+document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),4000);
+out.textContent=`Backup baixado: ${backup.escalas?Object.keys(backup.escalas).length:0} meses e ${backup.servos?.length||0} servos.`}
+catch(e){out.textContent=e.message}};
+$("backupPick").onclick=()=>{$("backupFile").click()};
+$("backupFile").onchange=async(e)=>{const arquivo=e.target.files?.[0];e.target.value="";if(!arquivo)return;
+const out=$("backupMsg");if(arquivo.size>5*1024*1024){out.textContent="O arquivo excede o limite de 5 MB.";return}
+let backup;try{backup=JSON.parse(await arquivo.text())}catch(err){out.textContent="Não foi possível ler o arquivo JSON.";return}
+if(!confirm("A restauração substituirá todos os servos e escalas atuais pelos dados deste arquivo. Deseja continuar?"))return;
+out.textContent="Validando e restaurando backup...";
+try{const resultado=await api("/api/backup","POST",backup);servos=await api("/api/servos");await carregarEscala();
+out.textContent=`Restauração concluída: ${resultado.meses} meses e ${resultado.servos} servos.`;renderServos()}
+catch(err){out.textContent=err.message}};
 
 // ---- Servos
 const tipoDe=s=>s.tipo||(/\be\b/i.test(s.nome||"")?"casal":"individual");
